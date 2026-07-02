@@ -22,7 +22,8 @@ export default function AdminProductsPage() {
   const [categoryId, setCategoryId] = useState("");
   const [price, setPrice] = useState("0");
   const [importCostAvg, setImportCostAvg] = useState("0");
-  const [imageUrl, setImageUrl] = useState(""); // ✅ NEW
+  const [imageUrl, setImageUrl] = useState(""); 
+  const [description, setDescription] = useState(""); // 🟢 NEW: State สำหรับเก็บรายละเอียดสินค้า
   const [isActive, setIsActive] = useState(true);
 
   // fitment modal
@@ -56,7 +57,8 @@ export default function AdminProductsPage() {
     setCategoryId("");
     setPrice("0");
     setImportCostAvg("0");
-    setImageUrl(""); // ✅ NEW
+    setImageUrl(""); 
+    setDescription(""); // 🟢 NEW: รีเซ็ตค่า Description
     setIsActive(true);
   }
 
@@ -73,7 +75,8 @@ export default function AdminProductsPage() {
     setCategoryId(p.category?.id ? String(p.category.id) : "");
     setPrice(String(p.price ?? "0"));
     setImportCostAvg(String(p.importCostAvg ?? "0"));
-    setImageUrl(p.imageUrl || ""); // ✅ NEW
+    setImageUrl(p.imageUrl || ""); 
+    setDescription(p.description || ""); // 🟢 NEW: ดึง Description มาโชว์ตอนแก้ไข
     setIsActive(p.isActive !== false);
     setOpenProduct(true);
   }
@@ -86,7 +89,8 @@ export default function AdminProductsPage() {
         categoryId: categoryId ? Number(categoryId) : null,
         price: Number(price),
         importCostAvg: Number(importCostAvg),
-        imageUrl: imageUrl.trim() || null, // ✅ NEW
+        imageUrl: imageUrl.trim() || null, 
+        description: description.trim() || null, // 🟢 NEW: ส่ง Description ไปเซฟ
         isActive,
       }),
     onSuccess: async () => {
@@ -103,7 +107,8 @@ export default function AdminProductsPage() {
         categoryId: categoryId ? Number(categoryId) : null,
         price: Number(price),
         importCostAvg: Number(importCostAvg),
-        imageUrl: imageUrl.trim() || null, // ✅ NEW
+        imageUrl: imageUrl.trim() || null, 
+        description: description.trim() || null, // 🟢 NEW: ส่ง Description ไปอัปเดต
         isActive,
       }),
     onSuccess: async () => {
@@ -138,7 +143,7 @@ export default function AdminProductsPage() {
 
         <div className="flex flex-col gap-2 md:flex-row md:items-center">
           <input
-            className="rounded-xl border border-line bg-white px-3 py-2 text-sm"
+            className="w-full md:w-auto rounded-xl border border-line bg-white px-3 py-2 text-sm"
             placeholder="ค้นหา ชื่อ/sku..."
             value={keyword}
             onChange={(e) => {
@@ -147,7 +152,7 @@ export default function AdminProductsPage() {
             }}
           />
           <button
-            className="rounded-xl bg-ink px-3 py-2 text-sm font-medium text-white hover:opacity-95"
+            className="w-full md:w-auto rounded-xl bg-ink px-4 py-2 text-sm font-medium text-white hover:opacity-95"
             onClick={openCreate}
           >
             เพิ่มสินค้า
@@ -155,43 +160,92 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      <Card className="p-5">
+      <Card className="p-0 md:p-5 overflow-hidden">
         {productsQ.isLoading ? (
-          <div className="text-sm text-muted">กำลังโหลด...</div>
+          <div className="p-5 text-sm text-muted">กำลังโหลด...</div>
         ) : productsQ.isError ? (
-          <div className="text-sm text-rose-700">โหลดสินค้าไม่สำเร็จ</div>
+          <div className="p-5 text-sm text-rose-700">โหลดสินค้าไม่สำเร็จ</div>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            {/* 📱 1. LAYOUT FOR MOBILE (Card View) */}
+            <div className="md:hidden divide-y divide-line">
+              {rows.map((p) => (
+                <div key={p.id} className="p-4 space-y-3 bg-white">
+                  <div className="flex justify-between items-start">
+                    <div className="flex gap-3">
+                      {/* Thumbnail เล็กๆ */}
+                      <div className="w-14 h-14 rounded-lg bg-stone-100 flex-shrink-0 border border-stone-200 overflow-hidden">
+                        {p.imageUrl ? (
+                          <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[10px] text-stone-400">No Img</div>
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-bold text-sm text-ink break-words">{p.name}</div>
+                        <div className="text-xs text-muted mt-0.5">SKU: {p.sku || "-"}</div>
+                        <div className="text-[11px] text-stone-500 mt-1">{p.category?.name || "ไม่ระบุหมวดหมู่"}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs bg-stone-50 p-2.5 rounded-xl border border-stone-100">
+                    <div><span className="text-muted">ราคา:</span> <span className="font-semibold text-ink">฿{p.price ?? "-"}</span></div>
+                    <div><span className="text-muted">สต๊อก:</span> <StockBadge qty={p.stockQty ?? 0} /></div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1">
+                    <div>
+                      {p.isActive === false ? (
+                        <Badge tone="red">ปิดการขาย</Badge>
+                      ) : (
+                        <Badge tone="green">เปิดขาย</Badge>
+                      )}
+                    </div>
+                    <div className="flex gap-1.5">
+                      <button className="px-2.5 py-1.5 rounded-lg border border-line text-xs font-medium bg-white" onClick={() => { setFitProduct(p); setOpenFitment(true); }}>Fit</button>
+                      <button className="px-2.5 py-1.5 rounded-lg border border-line text-xs font-medium bg-white" onClick={() => openEdit(p)}>แก้</button>
+                      <button className="px-2.5 py-1.5 rounded-lg border border-rose-200 text-rose-600 text-xs font-medium bg-rose-50" onClick={() => { if(window.confirm('ลบสินค้านี้?')) deleteMut.mutate(p.id) }}>ลบ</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {rows.length === 0 && (
+                <div className="py-8 text-center text-sm text-muted">ไม่พบสินค้า</div>
+              )}
+            </div>
+
+            {/* 💻 2. LAYOUT FOR DESKTOP (Table View) */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="text-xs text-muted">
                   <tr className="border-b border-line">
-                    <th className="py-3 text-left font-medium">SKU</th>
-                    <th className="py-3 text-left font-medium">ชื่อสินค้า</th>
-                    <th className="py-3 text-left font-medium">หมวดหมู่</th>
-                    <th className="py-3 text-right font-medium">ราคา</th>
-                    <th className="py-3 text-right font-medium">ต้นทุนเฉลี่ย</th>
-                    <th className="py-3 text-right font-medium">สต๊อก</th>
-                    <th className="py-3 text-left font-medium">รูป</th>
-                    <th className="py-3 text-left font-medium">สถานะ</th>
-                    <th className="py-3 text-right font-medium">จัดการ</th>
+                    <th className="py-3 px-2 text-left font-medium whitespace-nowrap">SKU</th>
+                    <th className="py-3 px-2 text-left font-medium min-w-[200px]">ชื่อสินค้า</th>
+                    <th className="py-3 px-2 text-left font-medium">หมวดหมู่</th>
+                    <th className="py-3 px-2 text-right font-medium">ราคา</th>
+                    <th className="py-3 px-2 text-right font-medium">ต้นทุนเฉลี่ย</th>
+                    <th className="py-3 px-2 text-right font-medium">สต๊อก</th>
+                    <th className="py-3 px-2 text-left font-medium">รูป</th>
+                    <th className="py-3 px-2 text-left font-medium">สถานะ</th>
+                    <th className="py-3 px-2 text-right font-medium min-w-[220px]">จัดการ</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((p) => (
-                    <tr key={p.id} className="border-b border-line">
-                      <td className="py-3">{p.sku || "-"}</td>
-                      <td className="py-3">{p.name}</td>
-                      <td className="py-3">{p.category?.name || "-"}</td>
-                      <td className="py-3 text-right">{p.price ?? "-"}</td>
-                      <td className="py-3 text-right">{p.importCostAvg ?? "-"}</td>
-                      <td className="py-3 text-right">
+                    <tr key={p.id} className="border-b border-line hover:bg-stone-50/50">
+                      <td className="py-3 px-2">{p.sku || "-"}</td>
+                      <td className="py-3 px-2 font-medium text-ink">{p.name}</td>
+                      <td className="py-3 px-2">{p.category?.name || "-"}</td>
+                      <td className="py-3 px-2 text-right">{p.price ?? "-"}</td>
+                      <td className="py-3 px-2 text-right text-stone-400">{p.importCostAvg ?? "-"}</td>
+                      <td className="py-3 px-2 text-right">
                         <StockBadge qty={p.stockQty ?? 0} />
                       </td>
 
-                      <td className="py-3">
+                      <td className="py-3 px-2">
                         {p.imageUrl ? (
-                          <a className="text-xs underline" href={p.imageUrl} target="_blank" rel="noreferrer">
+                          <a className="text-xs text-blue-600 hover:underline flex items-center gap-1" href={p.imageUrl} target="_blank" rel="noreferrer">
                             ดูรูป
                           </a>
                         ) : (
@@ -199,18 +253,18 @@ export default function AdminProductsPage() {
                         )}
                       </td>
 
-                      <td className="py-3">
+                      <td className="py-3 px-2">
                         {p.isActive === false ? (
-                          <Badge tone="red">ปิดการขาย</Badge>
+                          <Badge tone="red">ปิด</Badge>
                         ) : (
-                          <Badge tone="green">เปิดขาย</Badge>
+                          <Badge tone="green">เปิด</Badge>
                         )}
                       </td>
 
-                      <td className="py-3 text-right">
-                        <div className="flex justify-end gap-2">
+                      <td className="py-3 px-2 text-right">
+                        <div className="flex justify-end gap-1.5">
                           <button
-                            className="rounded-xl border border-line px-3 py-1.5 text-sm hover:bg-stone-50"
+                            className="rounded-xl border border-line px-3 py-1.5 text-xs hover:bg-stone-100 transition"
                             onClick={() => {
                               setFitProduct(p);
                               setOpenFitment(true);
@@ -219,14 +273,14 @@ export default function AdminProductsPage() {
                             Fitment
                           </button>
                           <button
-                            className="rounded-xl border border-line px-3 py-1.5 text-sm hover:bg-stone-50"
+                            className="rounded-xl border border-line px-3 py-1.5 text-xs hover:bg-stone-100 transition"
                             onClick={() => openEdit(p)}
                           >
                             แก้ไข
                           </button>
                           <button
-                            className="rounded-xl border border-line px-3 py-1.5 text-sm hover:bg-stone-50"
-                            onClick={() => deleteMut.mutate(p.id)}
+                            className="rounded-xl border border-rose-200 bg-rose-50 text-rose-600 px-3 py-1.5 text-xs hover:bg-rose-100 transition"
+                            onClick={() => { if(window.confirm('ยืนยันการลบสินค้า?')) deleteMut.mutate(p.id) }}
                           >
                             ลบ
                           </button>
@@ -237,8 +291,8 @@ export default function AdminProductsPage() {
 
                   {rows.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="py-6 text-center text-sm text-muted">
-                        ไม่พบสินค้า
+                      <td colSpan={9} className="py-8 text-center text-sm text-muted">
+                        ไม่พบสินค้าในระบบ
                       </td>
                     </tr>
                   )}
@@ -246,20 +300,21 @@ export default function AdminProductsPage() {
               </table>
             </div>
 
-            <div className="mt-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-              <div className="text-xs text-muted">
-                หน้า {page + 1} / {totalPages}
+            {/* Pagination */}
+            <div className="p-4 mt-1 border-t border-line flex flex-col gap-3 md:flex-row md:items-center md:justify-between bg-stone-50/50">
+              <div className="text-xs text-muted text-center md:text-left">
+                แสดงหน้า {page + 1} จากทั้งหมด {totalPages}
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 justify-center">
                 <button
-                  className="rounded-xl border border-line bg-white px-3 py-1.5 text-sm hover:bg-stone-50 disabled:opacity-50"
+                  className="rounded-xl border border-line bg-white px-4 py-1.5 text-sm font-medium hover:bg-stone-50 disabled:opacity-40 disabled:hover:bg-white transition"
                   disabled={page <= 0}
                   onClick={() => setPage((x) => x - 1)}
                 >
                   ก่อนหน้า
                 </button>
                 <button
-                  className="rounded-xl border border-line bg-white px-3 py-1.5 text-sm hover:bg-stone-50 disabled:opacity-50"
+                  className="rounded-xl border border-line bg-white px-4 py-1.5 text-sm font-medium hover:bg-stone-50 disabled:opacity-40 disabled:hover:bg-white transition"
                   disabled={page >= totalPages - 1}
                   onClick={() => setPage((x) => x + 1)}
                 >
@@ -271,32 +326,45 @@ export default function AdminProductsPage() {
         )}
       </Card>
 
-      {/* Product modal */}
+      {/* Product modal - Responsive & Description Field Added */}
       <Modal
         open={openProduct}
         title={editing ? "แก้ไขสินค้า" : "เพิ่มสินค้า"}
         onClose={() => setOpenProduct(false)}
       >
-        <div className="space-y-3">
+        <div className="space-y-4 max-h-[80vh] overflow-y-auto px-1 pb-4">
           <Field label="SKU">
             <input
-              className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-ink transition"
               value={sku}
               onChange={(e) => setSku(e.target.value)}
+              placeholder="รหัสสินค้า"
             />
           </Field>
 
           <Field label="ชื่อสินค้า">
             <input
-              className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-ink transition"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              placeholder="ชื่อสินค้า..."
+            />
+          </Field>
+          
+          {/* 🟢 NEW: กล่องใส่ Description กรอกข้อความยาวๆ ได้ */}
+          <Field label="รายละเอียดสินค้า">
+            <textarea
+              className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-ink transition resize-y min-h-[100px]"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="กรอกรายละเอียด, คุณสมบัติ หรือสเปคของสินค้า..."
+              rows={4}
             />
           </Field>
 
           <Field label="หมวดหมู่">
             <select
-              className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-ink transition"
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
             >
@@ -309,12 +377,12 @@ export default function AdminProductsPage() {
             </select>
           </Field>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <Field label="ราคา">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="ราคา (บาท)">
               <input
                 type="number"
                 step="0.01"
-                className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm"
+                className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-ink transition"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
               />
@@ -324,51 +392,55 @@ export default function AdminProductsPage() {
               <input
                 type="number"
                 step="0.01"
-                className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm"
+                className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-ink transition"
                 value={importCostAvg}
                 onChange={(e) => setImportCostAvg(e.target.value)}
               />
             </Field>
           </div>
 
-          {/* ✅ NEW: Image URL */}
           <Field label="Image URL (ลิงก์รูปสินค้า)">
             <input
-              className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-ink transition"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="https://....jpg"
             />
-            <div className="mt-1 text-xs text-muted">
-              ใส่ URL ที่เปิดใน browser ได้ (http/https) เช่น รูปจาก CDN/Google Drive (แบบ public)
+            <div className="mt-1.5 text-[11px] text-muted">
+              ใส่ URL ที่เปิดใน browser ได้ (เช่น รูปจาก CDN/Google Drive แบบ public)
             </div>
           </Field>
 
-          <Field label="สต๊อก (แก้ไม่ได้)">
+          <Field label="สต๊อก (เพิ่มผ่านการนำเข้าเท่านั้น)">
             <input
-              className="w-full rounded-xl border border-line bg-stone-50 px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-line bg-stone-100 text-stone-500 px-3 py-2.5 text-sm cursor-not-allowed"
               value={editing ? editing.stockQty ?? 0 : 0}
               readOnly
             />
           </Field>
 
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
-            เปิดขาย
+          <label className="flex items-center gap-2.5 text-sm font-medium bg-stone-50 p-3 rounded-xl border border-stone-100 cursor-pointer">
+            <input 
+              type="checkbox" 
+              checked={isActive} 
+              onChange={(e) => setIsActive(e.target.checked)} 
+              className="w-4 h-4 rounded border-gray-300 text-ink focus:ring-ink cursor-pointer"
+            />
+            เปิดให้ลูกค้าสามารถสั่งซื้อสินค้านี้ได้ (Active)
           </label>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 pt-2">
             <button
               disabled={!canSave}
-              className={`rounded-xl px-4 py-2 text-sm font-medium ${
-                canSave ? "bg-ink text-white hover:opacity-95" : "bg-stone-200 text-stone-500 cursor-not-allowed"
+              className={`flex-1 md:flex-none rounded-xl px-6 py-2.5 text-sm font-medium transition ${
+                canSave ? "bg-ink text-white hover:opacity-90 shadow-sm" : "bg-stone-200 text-stone-400 cursor-not-allowed"
               }`}
               onClick={() => (editing ? updateMut.mutate() : createMut.mutate())}
             >
-              บันทึก
+              {createMut.isPending || updateMut.isPending ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
             </button>
             <button
-              className="rounded-xl border border-line bg-white px-4 py-2 text-sm hover:bg-stone-50"
+              className="flex-1 md:flex-none rounded-xl border border-line bg-white px-6 py-2.5 text-sm font-medium hover:bg-stone-50 transition"
               onClick={() => setOpenProduct(false)}
             >
               ยกเลิก
@@ -376,22 +448,26 @@ export default function AdminProductsPage() {
           </div>
 
           {createMut.isError || updateMut.isError ? (
-            <div className="text-sm text-rose-700">บันทึกไม่สำเร็จ (ตรวจ SKU ซ้ำ/ข้อมูลไม่ครบ)</div>
+            <div className="p-3 bg-rose-50 text-rose-700 text-sm rounded-xl border border-rose-200">
+              ❌ บันทึกไม่สำเร็จ กรุณาตรวจสอบ SKU ซ้ำ หรือกรอกข้อมูลให้ครบถ้วน
+            </div>
           ) : null}
         </div>
       </Modal>
 
-      {/* Fitment modal */}
+      {/* Fitment modal (เก็บของเดิมไว้) */}
       <FitmentModal open={openFitment} product={fitProduct} onClose={() => setOpenFitment(false)} />
     </div>
   );
 }
 
+// ... โค้ดส่วนล่าง (Field, StockBadge, FitmentModal) ใช้ตัวเดิมของพี่ได้เลยครับ ...
+
 function Field({ label, children }) {
   return (
     <div>
-      <div className="text-xs text-muted">{label}</div>
-      <div className="mt-1">{children}</div>
+      <div className="text-xs font-medium text-stone-600 mb-1">{label}</div>
+      <div>{children}</div>
     </div>
   );
 }
@@ -496,7 +572,7 @@ function FitmentModal({ open, product, onClose }) {
 
   return (
     <Modal open={open} title={`Fitment ของสินค้า: ${product?.sku || ""}`} onClose={onClose}>
-      <div className="space-y-4">
+      <div className="space-y-4 max-h-[80vh] overflow-y-auto px-1">
         <div className="text-xs text-muted">
           กำหนดรุ่นรถ + ช่วงปีที่รองรับ (ตัวอย่าง: Civic 2016–2020)
         </div>
@@ -505,7 +581,7 @@ function FitmentModal({ open, product, onClose }) {
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <Field label="แบรนด์รถ">
             <select
-              className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-ink transition"
               value={brandId}
               onChange={(e) => {
                 setBrandId(e.target.value);
@@ -521,7 +597,7 @@ function FitmentModal({ open, product, onClose }) {
 
           <Field label="รุ่นรถ">
             <select
-              className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-ink transition"
               value={modelId}
               onChange={(e) => setModelId(e.target.value)}
             >
@@ -533,12 +609,12 @@ function FitmentModal({ open, product, onClose }) {
           </Field>
 
           <Field label="ปีเริ่มต้น">
-            <input type="number" className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm"
+            <input type="number" className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-ink transition"
                    value={yearFrom} onChange={(e) => setYearFrom(e.target.value)} />
           </Field>
 
           <Field label="ปีสิ้นสุด">
-            <input type="number" className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm"
+            <input type="number" className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-ink transition"
                    value={yearTo} onChange={(e) => setYearTo(e.target.value)} />
           </Field>
         </div>
@@ -546,8 +622,8 @@ function FitmentModal({ open, product, onClose }) {
         <div className="flex gap-2">
           <button
             disabled={!canSaveFit}
-            className={`rounded-xl px-4 py-2 text-sm font-medium ${
-              canSaveFit ? "bg-ink text-white hover:opacity-95" : "bg-stone-200 text-stone-500 cursor-not-allowed"
+            className={`rounded-xl px-5 py-2.5 text-sm font-medium transition ${
+              canSaveFit ? "bg-ink text-white hover:opacity-90" : "bg-stone-200 text-stone-400 cursor-not-allowed"
             }`}
             onClick={() => (editingFit ? updateMut.mutate() : addMut.mutate())}
           >
@@ -556,7 +632,7 @@ function FitmentModal({ open, product, onClose }) {
 
           {editingFit ? (
             <button
-              className="rounded-xl border border-line bg-white px-4 py-2 text-sm hover:bg-stone-50"
+              className="rounded-xl border border-line bg-white px-5 py-2.5 text-sm font-medium hover:bg-stone-50 transition"
               onClick={resetFitForm}
             >
               ยกเลิกแก้ไข
@@ -565,35 +641,33 @@ function FitmentModal({ open, product, onClose }) {
         </div>
 
         {/* list */}
-        <Card className="p-4">
-          <div className="text-sm font-semibold">รายการ Fitment</div>
-          <div className="mt-3 overflow-x-auto">
+        <div className="rounded-xl border border-line overflow-hidden mt-4">
+          <div className="bg-stone-50 py-2.5 px-4 text-sm font-semibold border-b border-line">รายการ Fitment ที่มีอยู่</div>
+          <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-xs text-muted">
+              <thead className="text-xs text-muted bg-white">
                 <tr className="border-b border-line">
-                  <th className="py-2 text-left font-medium">แบรนด์</th>
-                  <th className="py-2 text-left font-medium">รุ่น</th>
-                  <th className="py-2 text-right font-medium">ช่วงปี</th>
-                  <th className="py-2 text-right font-medium">จัดการ</th>
+                  <th className="py-2.5 px-4 text-left font-medium">แบรนด์/รุ่น</th>
+                  <th className="py-2.5 px-4 text-center font-medium">ช่วงปี</th>
+                  <th className="py-2.5 px-4 text-right font-medium">จัดการ</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-white divide-y divide-line">
                 {rows.map((r) => (
-                  <tr key={r.id} className="border-b border-line">
-                    <td className="py-2">{r.brandName}</td>
-                    <td className="py-2">{r.modelName}</td>
-                    <td className="py-2 text-right">{r.yearFrom}–{r.yearTo}</td>
-                    <td className="py-2 text-right">
-                      <div className="flex justify-end gap-2">
+                  <tr key={r.id} className="hover:bg-stone-50/50">
+                    <td className="py-2.5 px-4 font-medium text-ink">{r.brandName} <span className="text-muted font-normal">{r.modelName}</span></td>
+                    <td className="py-2.5 px-4 text-center">{r.yearFrom} – {r.yearTo}</td>
+                    <td className="py-2.5 px-4 text-right">
+                      <div className="flex justify-end gap-1.5">
                         <button
-                          className="rounded-xl border border-line px-3 py-1.5 text-sm hover:bg-stone-50"
+                          className="rounded-lg border border-line px-2.5 py-1 text-xs hover:bg-stone-100"
                           onClick={() => startEdit(r)}
                         >
                           แก้ไข
                         </button>
                         <button
-                          className="rounded-xl border border-line px-3 py-1.5 text-sm hover:bg-stone-50"
-                          onClick={() => delMut.mutate(r.id)}
+                          className="rounded-lg border border-rose-200 text-rose-600 bg-rose-50 px-2.5 py-1 text-xs hover:bg-rose-100"
+                          onClick={() => { if(window.confirm('ลบ Fitment นี้?')) delMut.mutate(r.id) }}
                         >
                           ลบ
                         </button>
@@ -603,20 +677,20 @@ function FitmentModal({ open, product, onClose }) {
                 ))}
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="py-4 text-center text-sm text-muted">ยังไม่มี Fitment</td>
+                    <td colSpan={3} className="py-6 text-center text-sm text-muted">ยังไม่มี Fitment สำหรับสินค้านี้</td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-        </Card>
+        </div>
 
         {(addMut.isError || updateMut.isError) ? (
-          <div className="text-sm text-rose-700">บันทึก Fitment ไม่สำเร็จ (ตรวจปี/ข้อมูลซ้ำ)</div>
+          <div className="p-3 bg-rose-50 text-rose-700 text-sm rounded-xl border border-rose-200 mt-2">
+            ❌ บันทึก Fitment ไม่สำเร็จ (โปรดตรวจสอบช่วงปีหรือข้อมูลอาจซ้ำ)
+          </div>
         ) : null}
       </div>
     </Modal>
-    
   );
-
 }

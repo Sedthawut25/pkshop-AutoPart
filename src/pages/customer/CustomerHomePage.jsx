@@ -55,12 +55,12 @@ export default function CustomerHomePage() {
               alt="banner"
             />
             <img
-              src="https://srisiamonline.com/pub/media/catalog/product/cache/964d5d8e83d07016bd3da81940f632de/4/8/48928304b.jpg"
+              src="https://inwfile.com/s-fa/353b1v.jpg"
               className="aspect-[4/3] rounded-2xl object-cover"
               alt="banner"
             />
             <img
-              src="https://srisiamonline.com/pub/media/catalog/product/cache/964d5d8e83d07016bd3da81940f632de/1/2/12x55424776b.jpg"
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjW2FAKKkV9Sj3mqausUJSDeL6Sq4dZH1BrWkbZEEykA&s=10"
               className="aspect-[4/3] rounded-2xl object-cover"
               alt="banner"
             />
