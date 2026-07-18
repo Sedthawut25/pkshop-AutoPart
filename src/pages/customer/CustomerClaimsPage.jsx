@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Package } from 'lucide-react';
+import { Package, Truck } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
 
 export default function CustomerClaimsPage() {
@@ -32,7 +32,7 @@ export default function CustomerClaimsPage() {
         }
     };
 
-    const getStatusBadge = (status) => {
+    const getStatusBadge = (status, type) => {
         switch (status) {
             case "PENDING" :
                 return (
@@ -43,7 +43,7 @@ export default function CustomerClaimsPage() {
             case "APPROVED" :
                 return (
                     <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs text-emerald-700 border border-emerald-200">
-                        อนุมัติแล้ว
+                        {type === "EXCHANGE" ? "อนุมัติ (กำลังจัดส่งชิ้นค้าชิ้นใหม่)" : "อนุมัติ (คืนเงินแล้ว)"}
                     </span>
                 );
             case "REJECTED" :
@@ -63,7 +63,9 @@ export default function CustomerClaimsPage() {
 
     //ประเภทการเคลมสินค้าไทย
     const getClaimTypeText = (type) => {
-        return type === "RETURN_MONEY" ? "ขอคืนเงิน" : "เปลี่ยนสินค้าชิ้นใหม่";
+        if (type === "RETURN_MONEY") return "ขอคืนเงิน";
+        if (type === "EXCHANGE") return "เปลี่ยนสินค้า";
+        return type;
     };
 
     if (loading) {
@@ -91,7 +93,7 @@ export default function CustomerClaimsPage() {
                 <div className="space-y-4">
                     {claims.map((claim) => (
                         <div
-                            key={claims.id}
+                            key={claim.id}
                             className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm flex flex-col md:flex-row gap-6 transition hover:border-stone-300"
                         >
                             <div className="w-full md:w-40 h-40 shrink-0 rounded-2xl overflow-hidden border border-stone-100 bg-stone-50 flex items-center justify-center">
@@ -117,7 +119,7 @@ export default function CustomerClaimsPage() {
                                         </h3>
                                     </div>
                                     <div>
-                                        {getStatusBadge(claim.status)}
+                                        {getStatusBadge(claim.status, claim.claimType)}
                                     </div>
                                 </div>
 
@@ -134,6 +136,27 @@ export default function CustomerClaimsPage() {
                                         <span className="text-stone-500 block text-xs font-semibold mb-1">เหตุผลและรายละเอียด</span>
                                         <p className="text-stone-700 text-sm">{claim.description || "-"}</p>
                                     </div>
+
+                                    {claim.claimType === "EXCHANGE" && claim.status === "APPROVED" && (
+                                        <div className="col-span-2 mt-2 flex items-center gap-3 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                                            <div className="bg-emerald-100 p-2 rounded-lg">
+                                                <Truck className="w-5 h-5 text-emerald-700" strokeWidth={2} />
+                                            </div>
+                                            <div>
+                                                <span className="block text-xs font-bold text-emerald-800 mb-0.5">สถานะการจัดส่งสินค้าชิ้นใหม่</span>
+                                                <span className="text-sm font-semibold text-emerald-900">
+                                                    {claim.replacementTrackingNumber ? (
+                                                        <div className="flex flex-col gap-0.5">
+                                                             <span>ขนส่ง: <span className="font-bold text-emerald-950">{claim.replacementShippingProvider || "ไม่ระบุ"}</span></span>
+                                                             <span>เลขพัสดุ: <span className="font-bold text-emerald-950">{claim.replacementTrackingNumber}</span></span>
+                                                         </div>
+                                                    ) : (
+                                                         "อยู่ระหว่างเตรียมจัดส่ง..."
+                                                    )}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="text-xs font-medium text-stone-400 pt-2 border-t border-stone-100">
@@ -153,5 +176,3 @@ export default function CustomerClaimsPage() {
         </div>
     )
 }
-
-

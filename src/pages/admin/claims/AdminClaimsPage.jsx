@@ -20,10 +20,13 @@ export default function AdminClaimsPage() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.data.success) {
-                setClaims(res.data.data || []);
+                const responseData = res.data.data;
+                const claimsArray = responseData?.content || responseData || [];
+                setClaims(Array.isArray(claimsArray) ? claimsArray : []);
             }
         } catch (error) {
             console.error("Error fetching admin claims:", error);
+            setClaims([]);
         } finally {
             setLoading(false);
         }
@@ -65,46 +68,63 @@ export default function AdminClaimsPage() {
         }
     };
 
+    const getClaimImage = (claim) => {
+        if(claim.imageUrl) return claim.imageUrl;
+        if(claim.attachments && claim.attachments.length > 0) {
+            return claim.attachments[0].fileUrl || claim.attachments[0].imageUrl;
+        }
+        return null;
+    };
+
+    const getClaimProductName = (claim) => {
+        if(claim.productName) return claim.productName;
+        if(claim.product && claim.product.name) return claim.product.name;
+        return "สินค้าทั่วไป";
+    }
+
     if (loading) return <div className="py-24 text-center text-stone-500 font-medium">กำลังโหลดรายการคำขอเคลม...</div>;
 
     return (
-        <div className="space-y-6 p-4 md:p-6 max-w-7xl mx-auto">
-            <div className="rounded-3xl border border-stone-200 bg-white p-5 md:p-6 shadow-sm">
-                <h2 className="text-xl md:text-2xl font-bold text-stone-900 mb-1">จัดการรายการคืน / เคลมสินค้า</h2>
+        <div className="space-y-4 md:space-y-6 p-3 md:p-6 max-w-7xl mx-auto">
+            
+            {/* Header Section */}
+            <div className="rounded-2xl md:rounded-3xl border border-stone-200 bg-white p-4 md:p-6 shadow-sm">
+                <h2 className="text-lg md:text-2xl font-bold text-stone-900 mb-1">จัดการรายการคืน / เคลมสินค้า</h2>
                 <p className="text-xs md:text-sm text-stone-500">ตรวจสอบหลักฐานและอนุมัติคำขอเปลี่ยนสินค้าหรือคืนเงินจากลูกค้า</p>
             </div>
 
             {claims.length === 0 ? (
-                <div className="rounded-3xl border-2 border-dashed border-stone-200 bg-white py-16 text-center text-stone-400 font-medium">
+                <div className="rounded-2xl md:rounded-3xl border-2 border-dashed border-stone-200 bg-white py-12 md:py-16 text-center text-stone-400 font-medium text-sm md:text-base">
                     ยังไม่มีคำขอคืนหรือเคลมสินค้าส่งเข้ามาในขณะนี้
                 </div>
             ) : (
                 <>
+                    {/* 📱 Mobile View (Card Style) */}
                     <div className="grid grid-cols-1 gap-4 md:hidden">
-                        {claims.map((claim) => (
-                            <div key={claim.id} className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm space-y-4">
+                        {(claims || []).map((claim) => (
+                            <div key={claim.id} className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm space-y-4">
                                 <div className="flex justify-between items-center border-b border-stone-100 pb-3">
                                     <span className="font-bold text-stone-900 text-sm">
                                         CLM-{String(claim.id).padStart(6, '0')}
                                     </span>
-                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getStatusStyle(claim.status)}`}>
+                                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${getStatusStyle(claim.status)}`}>
                                         {claim.status === "PENDING" && "รอตรวจสอบ"}
                                         {claim.status === "APPROVED" && "อนุมัติแล้ว"}
                                         {claim.status === "REJECTED" && "ปฏิเสธ"}
                                     </span>
                                 </div>
 
-                                <div className="flex gap-4">
-                                    {claim.imageUrl ? (
+                                <div className="flex gap-3">
+                                    {getClaimImage(claim) ? (
                                         <button
                                             type="button"
-                                            onClick={() => setSelectedImage(claim.imageUrl)}
+                                            onClick={() => setSelectedImage(getClaimImage(claim))}
                                             aria-label="ดูรูปภาพหลักฐานคำขอเคลม"
                                             className="relative w-20 h-20 rounded-xl overflow-hidden border border-stone-200 bg-stone-100 cursor-pointer shrink-0 flex items-center justify-center shadow-sm"
                                         >
-                                            <img src={claim.imageUrl} alt="หลักฐาน" className="w-full h-full object-cover" />
+                                            <img src={getClaimImage(claim)} alt="หลักฐาน" className="w-full h-full object-cover" />
                                             <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                                                <Eye className="w-4 h-4 text-white" />
+                                                <Eye className="w-5 h-5 text-white shadow-sm" />
                                             </div>
                                         </button>
                                     ) : (
@@ -113,39 +133,37 @@ export default function AdminClaimsPage() {
                                         </div>
                                     )}
 
-                                    {/* ข้อมูลสินค้าสไตล์การ์ด */}
-                                    <div className="space-y-1 min-w-0">
-                                        <div className="font-bold text-stone-800 text-sm truncate">{claim.productName || "สินค้าทั่วไป"}</div>
+                                    <div className="space-y-1 min-w-0 flex-1">
+                                        <div className="font-bold text-stone-800 text-sm line-clamp-2">{getClaimProductName(claim)}</div>
                                         <div className="text-xs text-stone-500 font-medium">จำนวน {claim.quantity} ชิ้น</div>
                                         <div className="pt-1">
                                             {claim.claimType === "RETURN_MONEY" ? (
-                                                <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md text-[11px] font-bold">ขอคืนเงิน</span>
+                                                <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md text-[10px] font-bold">ขอคืนเงิน</span>
                                             ) : (
-                                                <span className="text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md text-[11px] font-bold">เปลี่ยนชิ้นใหม่</span>
+                                                <span className="text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md text-[10px] font-bold">เปลี่ยนชิ้นใหม่</span>
                                             )}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="bg-stone-50 rounded-2xl p-3 text-xs text-stone-600 border border-stone-100/70">
+                                <div className="bg-stone-50 rounded-xl p-3 text-xs text-stone-600 border border-stone-100/70">
                                     <div className="font-bold text-stone-500 mb-0.5">เหตุผลการเคลม:</div>
-                                    <p className="break-words">{claim.description || "-"}</p>
+                                    <p className="break-words line-clamp-3">{claim.description || "-"}</p>
                                 </div>
 
-                                {/* ปุ่มกดจัดการในเวอร์ชัน Mobile ขยายใหญ่ให้จิ้มง่ายขึ้น */}
                                 {claim.status === "PENDING" && (
-                                    <div className="grid grid-cols-2 gap-2 pt-2">
+                                    <div className="grid grid-cols-2 gap-2 pt-1">
                                         <button
                                             onClick={() => handleUpdateStatus(claim.id, "APPROVED")}
                                             disabled={actionLoading}
-                                            className="w-full py-2 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition border border-emerald-200 flex items-center justify-center gap-1.5 text-xs font-bold"
+                                            className="w-full py-2.5 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 active:bg-emerald-200 transition border border-emerald-200 flex items-center justify-center gap-1.5 text-xs font-bold"
                                         >
                                             <Check className="w-4 h-4" /> อนุมัติ
                                         </button>
                                         <button
                                             onClick={() => handleUpdateStatus(claim.id, "REJECTED")}
                                             disabled={actionLoading}
-                                            className="w-full py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition border border-red-200 flex items-center justify-center gap-1.5 text-xs font-bold"
+                                            className="w-full py-2.5 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 active:bg-red-200 transition border border-red-200 flex items-center justify-center gap-1.5 text-xs font-bold"
                                         >
                                             <X className="w-4 h-4" /> ปฏิเสธ
                                         </button>
@@ -155,47 +173,48 @@ export default function AdminClaimsPage() {
                         ))}
                     </div>
 
+                    {/* 💻 Desktop View (Table Style) */}
                     <div className="hidden md:block rounded-3xl border border-stone-200 bg-white shadow-sm overflow-hidden">
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
+                            <table className="w-full text-left border-collapse min-w-[800px]">
                                 <thead>
                                     <tr className="bg-stone-50/70 border-b border-stone-100 text-stone-600 text-xs uppercase tracking-wider font-bold">
-                                        <th className="py-4 px-6">รหัสเคลม</th>
+                                        <th className="py-4 px-6 w-32">รหัสเคลม</th>
                                         <th className="py-4 px-6">สินค้า</th>
-                                        <th className="py-4 px-6">ความต้องการ</th>
-                                        <th className="py-4 px-6">รูปหลักฐาน</th>
+                                        <th className="py-4 px-6 w-32">ความต้องการ</th>
+                                        <th className="py-4 px-6 w-28 text-center">รูปหลักฐาน</th>
                                         <th className="py-4 px-6">เหตุผลการเคลม</th>
-                                        <th className="py-4 px-6 text-center">สถานะ</th>
-                                        <th className="py-4 px-6 text-center">จัดการ</th>
+                                        <th className="py-4 px-6 w-32 text-center">สถานะ</th>
+                                        <th className="py-4 px-6 w-28 text-center">จัดการ</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-stone-100 text-sm">
-                                    {claims.map((claim) => (
+                                    {(claims || []).map((claim) => (
                                         <tr key={claim.id} className="hover:bg-stone-50/40 transition">
-                                            <td className="py-4 px-6 font-bold text-stone-900">
+                                            <td className="py-4 px-6 font-bold text-stone-900 whitespace-nowrap">
                                                 CLM-{String(claim.id).padStart(6, '0')}
                                             </td>
                                             <td className="py-4 px-6">
-                                                <div className="font-bold text-stone-800">{claim.productName || "สินค้าทั่วไป"}</div>
+                                                <div className="font-bold text-stone-800 line-clamp-2">{getClaimProductName(claim)}</div>
                                                 <div className="text-xs text-stone-400 mt-0.5">จำนวน {claim.quantity} ชิ้น</div>
                                             </td>
-                                            <td className="py-4 px-6 font-semibold">
+                                            <td className="py-4 px-6 font-semibold whitespace-nowrap">
                                                 {claim.claimType === "RETURN_MONEY" ? (
                                                     <span className="text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg text-xs">ขอคืนเงิน</span>
                                                 ) : (
                                                     <span className="text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg text-xs">เปลี่ยนชิ้นใหม่</span>
                                                 )}
                                             </td>
-                                            <td className="py-4 px-6">
-                                                {claim.imageUrl ? (
+                                            <td className="py-4 px-6 flex justify-center">
+                                                {getClaimImage(claim) ? (
                                                     <button
                                                         type="button"
-                                                        onClick={() => setSelectedImage(claim.imageUrl)}
+                                                        onClick={() => setSelectedImage(getClaimImage(claim))}
                                                         aria-label="ดูรูปภาพหลักฐานคำขอเคลม"
                                                         className="group relative w-12 h-12 rounded-xl overflow-hidden border border-stone-200 bg-stone-100 cursor-pointer shadow-sm flex items-center justify-center"
                                                         title="คลิกเพื่อดูรูปภาพขนาดใหญ่"
                                                     >
-                                                        <img src={claim.imageUrl} alt="หลักฐาน" className="w-full h-full object-cover group-hover:scale-110 transition duration-200" />
+                                                        <img src={getClaimImage(claim)} alt="หลักฐาน" className="w-full h-full object-cover group-hover:scale-110 transition duration-200" />
                                                         <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
                                                             <Eye className="w-4 h-4 text-white" />
                                                         </div>
@@ -204,14 +223,14 @@ export default function AdminClaimsPage() {
                                                     <span className="text-xs text-stone-400">ไม่มีรูปภาพ</span>
                                                 )}
                                             </td>
-                                            <td className="py-4 px-6 max-w-xs truncate text-stone-600" title={claim.description}>
-                                                {claim.description || "-"}
+                                            <td className="py-4 px-6 text-stone-600">
+                                                <p className="line-clamp-2 text-xs" title={claim.description}>{claim.description || "-"}</p>
                                             </td>
-                                            <td className="py-4 px-6 text-center">
+                                            <td className="py-4 px-6 text-center whitespace-nowrap">
                                                 <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyle(claim.status)}`}>
                                                     {claim.status === "PENDING" && "รอตรวจสอบ"}
                                                     {claim.status === "APPROVED" && "อนุมัติแล้ว"}
-                                                    {claim.status === "REJECTED" && "ปฏิเสธการเคลม"}
+                                                    {claim.status === "REJECTED" && "ปฏิเสธ"}
                                                 </span>
                                             </td>
                                             <td className="py-4 px-6 text-center">
@@ -247,31 +266,32 @@ export default function AdminClaimsPage() {
                 </>
             )}
 
+            {/* 🖼️ Image Preview Modal (ปรับปรุงให้ Responsive และอยู่ตรงกลาง) */}
             {selectedImage && (
-                <dialog
-                    open
-                    className="fixed inset-0 z-50 m-0 flex items-center justify-center bg-black/70 backdrop-blur-sm p-3 md:p-4"
-                    onCancel={(event) => {
-                        event.preventDefault();
-                        setSelectedImage(null);
-                    }}
-                >
-                    <div className="relative w-full max-w-3xl max-h-[90vh] bg-white p-1.5 md:p-2 rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden cursor-default">
-                        <img 
-                            src={selectedImage} 
-                            alt="หลักฐานเคลมรูปใหญ่" 
-                            className="w-full h-auto max-h-[80vh] md:max-h-[85vh] rounded-xl md:rounded-2xl object-contain mx-auto"
-                        />
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="relative w-full max-w-4xl max-h-[90vh] bg-transparent flex flex-col items-center justify-center">
+                        
+                        {/* ปุ่มปิด */}
                         <button 
                             type="button"
                             onClick={() => setSelectedImage(null)}
                             aria-label="ปิดภาพหลักฐาน"
-                            className="absolute top-4 right-4 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition shadow-md"
+                            className="absolute -top-10 right-0 md:top-0 md:-right-12 bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition shadow-lg backdrop-blur-md"
                         >
-                            <X className="w-4 h-4" />
+                            <X className="w-6 h-6 md:w-8 md:h-8" />
                         </button>
+
+                        {/* กล่องใส่รูป */}
+                        <div className="bg-white p-2 rounded-2xl shadow-2xl overflow-hidden w-full flex justify-center">
+                            <img 
+                                src={selectedImage} 
+                                alt="หลักฐานเคลมรูปใหญ่" 
+                                className="w-auto h-auto max-w-full max-h-[75vh] md:max-h-[85vh] rounded-xl object-contain"
+                            />
+                        </div>
+                        
                     </div>
-                </dialog>
+                </div>
             )}
         </div>
     );

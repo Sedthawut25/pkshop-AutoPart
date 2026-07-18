@@ -85,12 +85,15 @@ export default function CustomerHistoryDetailPage() {
                 return alert("อัปโหลดรูปภาพไม่สำเร็จ: " + uploadRes.data.message);
             }
 
-            const imageUrl = uploadRes.data.data
+            const imageUrl = uploadRes.data.data;
+            console.log("URL รูปที่ได้จาก API Upload: ", imageUrl);
 
             await axios.post(
-                "http://localhost:8080/api/claims",
+                "http://localhost:8080/api/customer/claims",
                 {
-                    orderItemId: selectedItem.id,
+                    orderId: Number(historyId), 
+                    productId: selectedItem.productId || selectedItem.product?.id || selectedItem.id, 
+                    productName: selectedItem.productNameSnapshot || selectedItem.productName,
                     quantity: claimForm.quantity,
                     claimType: claimForm.claimType,
                     description: claimForm.description,
@@ -298,7 +301,7 @@ export default function CustomerHistoryDetailPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
                     <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl">
                         <h3 className="text-xl font-bold text-stone-900">ส่งเคลม / คืนสินค้า</h3>
-                        <p className="mt-2 text-sm text-stone-500 mb-4">สินค้า: {selectedItem?.productNameSnapshot}</p>
+                        <p className="mt-2 text-sm text-stone-500 mb-4">สินค้า: {selectedItem?.productNameSnapshot || selectedItem?.productName}</p>
                         
                         <div className="space-y-4">
                             <div>
@@ -310,7 +313,7 @@ export default function CustomerHistoryDetailPage() {
                                     onChange={e => setClaimForm({...claimForm, claimType: e.target.value})}
                                 >
                                     <option value="RETURN_MONEY">คืนเงิน</option>
-                                    <option value="REPLACE_PRODUCT">เปลี่ยนสินค้าชิ้นใหม่</option>
+                                    <option value="EXCHANGE">เปลี่ยนสินค้าชิ้นใหม่</option>
                                 </select>
                             </div>
 

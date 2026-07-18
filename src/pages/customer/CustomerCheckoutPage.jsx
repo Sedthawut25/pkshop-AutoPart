@@ -70,9 +70,9 @@ export default function CustomerCheckoutPage() {
 
     if (!token) {
       alert("กรุณา login ก่อน");
-      console.log("NO TOKEN:", token);
       return;
     }
+
     try {
       console.log("TOKEN:", token);
 
@@ -96,27 +96,19 @@ export default function CustomerCheckoutPage() {
       );
 
       const orderJson = await orderRes.json();
-      if (!orderRes.ok) throw new Error(orderJson.message);
+      if (!orderRes.ok) throw new Error(orderJson.message || "สร้างออเดอร์ไม่สำเร็จ");
 
-      const orderId = orderJson.data.orderId;
+      const stripeUrl = orderJson.data?.checkoutUrl;
 
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/customer/payment/checkout?orderId=${orderId}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message);
+      if (stripeUrl) {
+        console.log("กำลังเดินทางไปหน้าชำระเงินของ Stripe...");
+        window.location.href = stripeUrl; 
+      } else {
+        throw new Error("สร้างออเดอร์สำเร็จ แต่ระบบไม่ได้รับ URL ชำระเงิน");
       }
 
-      const url = await res.text();
-      window.location.href = url;
     } catch (err) {
+      console.error("Checkout Error:", err);
       alert(err.message);
     }
   };
