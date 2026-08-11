@@ -55,6 +55,7 @@ import CustomerHistoryDetailPage from "../../pages/customer/CustomerHistoryDetai
 import CustomerRequestPage from "../../pages/customer/CustomerRequestPage";
 import CustomerClaimsPage from "../../pages/customer/CustomerClaimsPage";
 import AdminClaimsPage from "../../pages/admin/claims/AdminClaimsPage";
+import CustomerProfile from "../../pages/customer/CustomerProfile";
 
 function Placeholder({ title }) {
   return <div className="p-6">{title}</div>;
@@ -178,6 +179,7 @@ export default function AppRouter() {
             <Route path="/customer/history/:historyId" element={<CustomerHistoryDetailPage/>}/>
             <Route path="requests" element={<CustomerRequestPage/>} />
             <Route path="/customer/claims" element={<CustomerClaimsPage/>} />
+            <Route path="/customer/profile" element={<CustomerProfile/>} />
           </Route>
         </Route>
         <Route path="/success" element={<PaymentSuccessPage />} />

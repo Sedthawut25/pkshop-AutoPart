@@ -12,7 +12,7 @@ export default function CustomerRegisterPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const canSubmit = fullName.trim() && email.trim() && password.trim() && !loading;
+  const canSubmit = fullName.trim() && email.trim() && password.trim().length >= 8 && !loading;
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -21,7 +21,6 @@ export default function CustomerRegisterPage() {
     try {
       setLoading(true);
 
-      // ✅ ปรับ field ให้ตรง backend ของคุณ
       await authApi.registerCustomer?.({
         fullName: fullName.trim(),
         email: email.trim(),
@@ -45,7 +44,6 @@ export default function CustomerRegisterPage() {
         backgroundImage: "url('https://4kwallpapers.com/images/walls/thumbs_3t/16569.jpg')" 
       }}
     >
-      {/* แผ่นกรองสีดำโปร่งแสง (Overlay) เพื่อให้เห็นฟอร์มชัดขึ้น */}
       <div className="absolute inset-0 bg-black/50" />
 
       {/* Content Container */}
@@ -56,7 +54,6 @@ export default function CustomerRegisterPage() {
             <div className="mt-2 text-sm text-stone-200">สมัครสมาชิกสำหรับลูกค้า</div>
           </div>
 
-          {/* 🧊 ตัวฟอร์มแบบกระจกฝ้า (Glassmorphism) สวยงามเหมือนหน้า Login */}
           <form onSubmit={onSubmit} className="space-y-4 rounded-3xl border border-white/10 bg-white/10 p-6 shadow-xl backdrop-blur-md">
             {errorMsg ? (
               <div className="rounded-2xl border border-rose-500/50 bg-rose-500/20 px-3 py-2 text-sm text-rose-200">
@@ -92,7 +89,7 @@ export default function CustomerRegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 className="mt-1 w-full rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm text-white placeholder-stone-400 outline-none transition-all focus:border-white focus:bg-white/20 focus:ring-1 focus:ring-white"
-                placeholder="อย่างน้อย 4 ตัว"
+                placeholder="อย่างน้อย 8 ตัว"
               />
             </div>
 

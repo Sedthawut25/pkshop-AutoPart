@@ -38,4 +38,12 @@ export const authApi = {
 
   registerCustomer: (payload) => api.post("/api/auth/register", payload).then(unwrap),
 
+  getProfile: () => api.get("/api/auth/me").then(unwrap),
+  logout: () => api.post("/api/auth/logout").then(unwrap),
+  refreshToken: (payload) => api.post("/api/auth/refresh", payload).then(unwrap),
+  forgotPassword: (payload) => api.post("/api/auth/forgot-password", payload).then(unwrap),
+  resetPassword: (payload) => api.post("/api/auth/reset-password", payload).then(unwrap),
+  changePassword: (payload) => api.post("/api/auth/change-password", payload).then(unwrap),
+
+  googleLogin: (payload) => api.post("/api/auth/google", payload).then(unwrap),
 };
