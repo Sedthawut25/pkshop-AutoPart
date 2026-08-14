@@ -56,6 +56,9 @@ import CustomerRequestPage from "../../pages/customer/CustomerRequestPage";
 import CustomerClaimsPage from "../../pages/customer/CustomerClaimsPage";
 import AdminClaimsPage from "../../pages/admin/claims/AdminClaimsPage";
 import CustomerProfile from "../../pages/customer/CustomerProfile";
+import AdminSupplierClaimsPage from "../../pages/admin/supplierClaims/AdminSupplierClaimsPage";
+import SupplierClaimsPage from "../../pages/supplier/claims/SupplierClaimsPage";
+import AdminAccountingPage from "../../pages/admin/accounting/AdminAccountingPage.jsx";
 
 function Placeholder({ title }) {
   return <div className="p-6">{title}</div>;
@@ -132,6 +135,8 @@ export default function AppRouter() {
             <Route path="/admin/reviews" element={<AdminReviewPage />} />
             <Route path="/admin/request" element={<AdminRequestPage />} />
             <Route path="/admin/claims" element={<AdminClaimsPage/> }/>
+            <Route path="/admin/supplier-claims" element={<AdminSupplierClaimsPage />} />
+            <Route path="/admin/accounting" element={<AdminAccountingPage/>}/>
           </Route>
         </Route>
 
@@ -156,6 +161,7 @@ export default function AppRouter() {
 
             <Route path="po" element={<SupplierPoListPage />} />
             <Route path="po/:poId" element={<SupplierPoDetailPage />} />
+            <Route path="claims" element={<SupplierClaimsPage />} />
           </Route>
         </Route>
 

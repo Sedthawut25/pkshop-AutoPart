@@ -9,12 +9,10 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-paper flex">
-      {/* 💻 Sidebar สำหรับหน้าจอ Desktop (ซ่อนบนมือถือ, แสดงบนจอ lg ขึ้นไป) */}
       <div className="hidden lg:block w-64 shrink-0">
         <Sidebar />
       </div>
 
-      {/* 📱 Sidebar ดึงจากขอบ (Drawer) สำหรับหน้าจอมือถือ */}
       {isMobileOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden">
           {/* พื้นหลังสีดำโปร่งแสง (กดเพื่อปิดเมนู) */}
@@ -39,7 +37,6 @@ export default function AdminLayout() {
         </div>
       )}
 
-      {/* 📦 พื้นที่เนื้อหาหลัก (Main Content) */}
       <main className="flex-1 flex flex-col min-w-0">
         {/* 📱 Header สำหรับมือถือ (แสดงเฉพาะหน้าจอเล็ก เพื่อโชว์ปุ่ม Hamburger) */}
         <div className="sticky top-0 z-40 flex items-center gap-x-4 bg-white px-4 py-3 border-b border-line shadow-sm sm:px-6 lg:hidden">
@@ -58,7 +55,6 @@ export default function AdminLayout() {
 
         <Topbar />
         
-        {/* คอนเทนต์ของแต่ละหน้า */}
         <div className="mx-auto w-full max-w-7xl p-4 md:p-6 lg:p-8">
           <Outlet />
         </div>

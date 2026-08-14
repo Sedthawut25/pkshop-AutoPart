@@ -14,11 +14,14 @@ import {
   Factory,
   MessageSquare,
   RefreshCw,
+  RotateCcw,
+  Wallet
 } from "lucide-react";
 import { authStorage } from "../../utils/authStorage";
 
 const nav = [
   { to: "/admin/dashboard", label: "แดชบอร์ด", icon: LayoutDashboard },
+  { to: "/admin/accounting", label: "บัญชีและการเงิน", icon: Wallet},
   { to: "/admin/orders", label: "คำสั่งซื้อ", icon: ShoppingBag },
   { to: "/admin/products", label: "สินค้า", icon: Package },
   { to: "/admin/categories", label: "หมวดหมู่สินค้า", icon: Tags },
@@ -31,6 +34,7 @@ const nav = [
   { to: "/admin/supplier", label: "ซัพพลายเออร์", icon: Factory },
   { to: "/admin/request", label: "รีเควสสินค้า", icon: ClipboardList },
   { to: "/admin/claims", label: "รายการเคลม", icon: RefreshCw },
+  { to: "/admin/supplier-claims", label: "เคลมซัพพลายเออร์", icon: RotateCcw },
   { to: "/admin/reviews", label: "รีวิวสินค้า", icon: MessageSquare },
 ];
 
@@ -45,7 +49,7 @@ export default function Sidebar({ onClose }) {
           </div>
           <div>
             <div className="text-sm font-bold text-ink">PKSHOP</div>
-            <div className="text-xs text-stone-500 font-medium">Admin Panel</div>
+            <div className="text-xs text-stone-500 font-medium">Admin </div>
           </div>
         </div>
       </div>

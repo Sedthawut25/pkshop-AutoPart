@@ -19,7 +19,7 @@ export default function AdminImportFromQuotationPage() {
   const quotation = quotationQ.data;
   const items = quotation?.items || [];
 
-  // ✅ รวมค่าสินค้า (จากใบเสนอราคา)
+  // รวมค่าสินค้า (จากใบเสนอราคา)
   const goodsTotal = useMemo(() => {
     return (items || []).reduce((sum, it) => {
       const unit = Number(it?.quotedUnitCost || 0);
@@ -33,16 +33,32 @@ export default function AdminImportFromQuotationPage() {
   const [shippingMethod, setShippingMethod] = useState("SEA");
   const [freightCost, setFreightCost] = useState("0");
   const [insuranceCost, setInsuranceCost] = useState("0");
-  const [customsDutyCost, setCustomsDutyCost] = useState("0");
   const [otherCost, setOtherCost] = useState("0");
 
-  // ✅ รวมต้นทุนทั้งหมด (ค่าสินค้า + ค่าใช้จ่าย)
+  const customsDutyCost = useMemo(() => {
+    const f = Number(freightCost || 0);
+    const ins = Number(insuranceCost || 0);
+
+    // หา CIF
+    const cif = goodsTotal + f + ins;
+
+    // คำนวณอากร 30%
+    const duty = cif * 0.30;
+
+    // คำนวณ VAT 7% from (CIF + อากร)
+    const vat = (cif + duty) * 0.07;
+
+    // รวมภาษีศุลกากรทั้งหมด
+    return duty + vat;
+  }, [goodsTotal, freightCost, insuranceCost]);
+
+  //รวมต้นทุนทั้งหมด (ค่าสินค้า + ค่าใช้จ่าย + ภาษีที่คำนวณ)
   const importTotal = useMemo(() => {
     const f = Number(freightCost || 0);
     const ins = Number(insuranceCost || 0);
-    const duty = Number(customsDutyCost || 0);
     const other = Number(otherCost || 0);
-    return goodsTotal + f + ins + duty + other;
+
+    return goodsTotal + f + ins + customsDutyCost + other;
   }, [goodsTotal, freightCost, insuranceCost, customsDutyCost, otherCost]);
 
   const createFlowMut = useMutation({
@@ -54,7 +70,7 @@ export default function AdminImportFromQuotationPage() {
         shippingMethod: shippingMethod,
         freightCost: Number(freightCost || 0),
         insuranceCost: Number(insuranceCost || 0),
-        customsDutyCost: Number(customsDutyCost || 0),
+        customsDutyCost: customsDutyCost,
         otherCost: Number(otherCost || 0),
       });
 
@@ -72,7 +88,6 @@ export default function AdminImportFromQuotationPage() {
       return { lot, doc };
     },
     onSuccess: ({ lot }) => {
-      // ✅ แนะนำพากลับไป lot detail เลย จะเห็นยอดรวม
       nav(`/admin/import/lots/${lot.id}`, { replace: true });
     },
   });

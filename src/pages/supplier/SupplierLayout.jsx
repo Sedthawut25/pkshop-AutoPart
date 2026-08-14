@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { FileText, RotateCcw } from "lucide-react";
 
 export default function SupplierLayout() {
   const [open, setOpen] = useState(false);
@@ -74,6 +75,13 @@ export default function SupplierLayout() {
                 <SideLink
                   to="/supplier/po"
                   label="ใบสั่งซื้อที่ได้รับ"
+                  icon={FileText}
+                  onClick={() => setOpen(false)}
+                />
+                <SideLink
+                  to="/supplier/claims"
+                  label="เคลมจากแอดมิน"
+                  icon={RotateCcw}
                   onClick={() => setOpen(false)}
                 />
               </div>
@@ -99,7 +107,7 @@ export default function SupplierLayout() {
               <div>
                 <div className="text-lg font-semibold">ซัพพลายเออร์</div>
                 <div className="text-xs text-muted">
-                  จัดการใบสั่งซื้อและทำใบเสนอราคา
+                  จัดการใบสั่งซื้อ ใบเสนอราคา และเคลมจากแอดมิน
                 </div>
               </div>
             </div>
@@ -115,7 +123,7 @@ export default function SupplierLayout() {
   );
 }
 
-function SideLink({ to, label, onClick }) {
+function SideLink({ to, label, icon: Icon, onClick }) {
   return (
     <NavLink
       to={to}
@@ -127,6 +135,7 @@ function SideLink({ to, label, onClick }) {
         ].join(" ")
       }
     >
+      {Icon ? <Icon size={16} /> : null}
       {label}
     </NavLink>
   );

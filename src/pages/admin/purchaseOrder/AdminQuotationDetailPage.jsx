@@ -30,6 +30,9 @@ export default function AdminQuotationDetailPage() {
   const items = data?.items || [];
   const status = (data?.status || "").toUpperCase();
 
+  const importLotId = data?.importLotId;
+  const hasImportId = !!importLotId;
+
   const canDecide = status === "SUBMITTED";
 
   return (
@@ -88,16 +91,25 @@ export default function AdminQuotationDetailPage() {
                 ปฏิเสธ
               </button>
 
-              <Link
-                to={`/admin/import/from-quotation/${poId}/${quotationId}`}
-                className={`rounded-xl px-3 py-2 text-sm font-medium ${
-                  status === "ACCEPTED"
-                    ? "bg-ink text-white hover:opacity-95"
-                    : "bg-stone-200 text-stone-500 cursor-not-allowed pointer-events-none"
-                }`}
-              >
-                สร้างการนำเข้า
-              </Link>
+              {hasImportId ? (
+                  <Link
+                      to={`/admin/import/lots/${importLotId}`}
+                      className="rounded-xl px-3 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                      ดูข้อมูลการนำเข้า
+                  </Link>
+              ) : (
+                  <Link
+                      to={`/admin/import/from-quotation/${poId}/${quotationId}`}
+                      className={`rounded-xl px-3 py-2 text-sm font-medium ${
+                          status === "ACCEPTED"
+                              ? "bg-ink text-white hover:opacity-95"
+                              : "bg-stone-200 text-stone-500 cursor-not-allowed pointer-events-none"
+                      }`}
+                  >
+                    สร้างการนำเข้า
+                  </Link>
+              )}
 
               <Link
                 to={`/admin/po/${poId}`}
