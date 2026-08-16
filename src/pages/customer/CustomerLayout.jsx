@@ -3,7 +3,8 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useCart } from "./cart/CartContext";
 
 // 1. นำเข้า useAuth จาก Clerk
-import { useAuth } from "@clerk/clerk-react"; 
+import { useAuth } from "@clerk/clerk-react";
+import {authStorage} from "../../utils/authStorage.js";
 
 export default function CustomerLayout() {
   return <Shell />;
@@ -46,16 +47,21 @@ function Shell() {
 
   async function logout() {
     try {
-      localStorage.removeItem("pk_token");
-      localStorage.removeItem("pk_role");
-      localStorage.removeItem("pk_roles");
-      localStorage.removeItem("pk_user");
-      
-      await signOut({ redirectUrl: "/customer/login" }); 
-      
+      authStorage.clear();
+
+      // ล้างของเก่าๆ ที่อาจจะกวนระบบ (ถ้ามี)
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+
+      if (signOut) {
+        await signOut();
+      }
+
     } catch (error) {
       console.error("Clerk logout error:", error);
-      nav("/customer/login", { replace: true });
+    } finally {
+      // 3. บังคับเปลี่ยนหน้าไปที่ Login เสมอ (ทำใน finally เพื่อให้รันชัวร์ 100%)
+      window.location.href = "/customer/login";
     }
   }
 
