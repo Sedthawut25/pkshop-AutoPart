@@ -85,7 +85,6 @@ export default function AppRouter() {
         <Route element={<PublicOnlyRoute />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/customs/login" element={<CustomsLoginPage />} />
-
           <Route path="/customer/login" element={<CustomerLoginPage />} />
           <Route path="/customer/register" element={<CustomerRegisterPage />} />
         </Route>

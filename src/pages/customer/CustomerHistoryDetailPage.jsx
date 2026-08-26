@@ -1,7 +1,7 @@
 import axios from "axios";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function CustomerHistoryDetailPage() {
     const { historyId } = useParams();
@@ -12,13 +12,15 @@ export default function CustomerHistoryDetailPage() {
 
     const [showClaimModal, setShowClaimModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
+    const [isUploading, setIsUploading] = useState(false); // 🟢 เพิ่ม State เช็คการอัปโหลด
+
     const [claimForm, setClaimForm] = useState({
         claimType: "RETURN_MONEY",
         quantity: 1,
         description: "",
-        imageFile: null,
+        imageUrl: "", // 🟢 เปลี่ยนมารับ URL แทน File
     });
-    const [submittingClaim, setSubmittingClaim] = useState(false); 
+    const [submittingClaim, setSubmittingClaim] = useState(false);
 
     async function loadHistory() {
         try {
@@ -54,25 +56,25 @@ export default function CustomerHistoryDetailPage() {
             claimType: "RETURN_MONEY",
             quantity: 1,
             description: "",
-            imageFile: null,
+            imageUrl: "",
         });
+        setIsUploading(false);
         setShowClaimModal(true);
     };
 
-    const handleSubmitClaim = async () => {
+    // 🟢 ฟังก์ชันอัปโหลดรูปภาพทันทีเมื่อเลือกไฟล์
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
 
-        if (!claimForm.description.trim()) return alert("กรุณากรอกเหตุผลการเคลม");
-        if (!claimForm.imageFile) return alert("กรุณาอัปโหลดรูปภาพหลักฐานความเสียหายของสินค้าที่คุณสั่ง");
-        
-        setSubmittingClaim(true);
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append("file", file);
+
         try {
             const token = localStorage.getItem("pk_token");
-
-            const formData = new FormData();
-            formData.append("file", claimForm.imageFile);
-
             const uploadRes = await axios.post(
-                "http://localhost:8080/api/upload/claim-image",
+                "http://localhost:8080/api/upload/image",
                 formData,
                 {
                     headers: {
@@ -81,23 +83,40 @@ export default function CustomerHistoryDetailPage() {
                 }
             );
 
-            if(!uploadRes.data.success) {
-                return alert("อัปโหลดรูปภาพไม่สำเร็จ: " + uploadRes.data.message);
-            }
+            const uploadedUrl = uploadRes.data?.data || uploadRes.data;
 
-            const imageUrl = uploadRes.data.data;
-            console.log("URL รูปที่ได้จาก API Upload: ", imageUrl);
+            if (uploadedUrl) {
+                setClaimForm({ ...claimForm, imageUrl: uploadedUrl });
+            } else {
+                alert("อัปโหลดรูปภาพไม่สำเร็จ");
+            }
+        } catch (err) {
+            console.error("Upload error:", err);
+            alert("เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    // 🟢 ฟังก์ชันส่งเคลม (ปรับให้ไม่ต้องอัปโหลดซ้ำ แค่ส่ง URL ไปบันทึก)
+    const handleSubmitClaim = async () => {
+        if (!claimForm.description.trim()) return alert("กรุณากรอกเหตุผลการเคลม");
+        if (!claimForm.imageUrl) return alert("กรุณาอัปโหลดรูปภาพหลักฐานความเสียหายของสินค้าที่คุณสั่ง");
+
+        setSubmittingClaim(true);
+        try {
+            const token = localStorage.getItem("pk_token");
 
             await axios.post(
                 "http://localhost:8080/api/customer/claims",
                 {
-                    orderId: Number(historyId), 
-                    productId: selectedItem.productId || selectedItem.product?.id || selectedItem.id, 
+                    orderId: Number(historyId),
+                    productId: selectedItem.productId || selectedItem.product?.id || selectedItem.id,
                     productName: selectedItem.productNameSnapshot || selectedItem.productName,
                     quantity: claimForm.quantity,
                     claimType: claimForm.claimType,
                     description: claimForm.description,
-                    imageUrl: imageUrl,
+                    imageUrl: claimForm.imageUrl, // 🟢 ส่ง URL ที่ได้จากการอัปโหลดไปให้ Backend
                 },
                 {
                     headers: {
@@ -196,7 +215,7 @@ export default function CustomerHistoryDetailPage() {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric'
-                         })}
+                        })}
                     </div>
                 </div>
             </div>
@@ -209,7 +228,7 @@ export default function CustomerHistoryDetailPage() {
                 <div className="divide-y divide-stone-100">
                     {(history.items || []).map((item) => (
                         <div
-                            key={item.id || item.productId} // 🟢 ใช้ item.id นำหน้าป้องกัน Key ชนกันใน React
+                            key={item.id || item.productId}
                             className="flex flex-col gap-4 py-5 px-6 sm:flex-row sm:items-center sm:justify-between"
                         >
                             <div>
@@ -243,9 +262,7 @@ export default function CustomerHistoryDetailPage() {
                 </div>
             </div>
 
-            {/* การจัดส่งและสรุปราคา */}
             <div className="grid gap-6 lg:grid-cols-2">
-                {/* บล็อกจัดส่ง */}
                 <div className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
                     <div className="text-lg font-bold text-stone-800 border-b pb-3 border-stone-100">
                         การจัดส่ง
@@ -255,39 +272,38 @@ export default function CustomerHistoryDetailPage() {
                             label="บริษัทขนส่ง"
                             value={history.shippingProvider || "-"}
                         />
-                        <InfoRow 
+                        <InfoRow
                             label="หมายเลขติดตามพัสดุ"
                             value={history.trackingNumber || "-"}
                         />
-                        <InfoRow 
+                        <InfoRow
                             label="ที่อยู่จัดส่ง"
                             value={history.shippingAddress || "-"}
                         />
                     </div>
                 </div>
 
-                {/* บล็อกสรุปยอดเงิน */}
                 <div className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
                     <div className="text-lg font-bold text-stone-800 border-b pb-3 border-stone-100">
                         สรุปราคา
                     </div>
 
                     <div className="mt-4 space-y-3">
-                        <PriceRow 
+                        <PriceRow
                             label="ยอดรวมสินค้า"
                             value={history.subTotal}
                         />
-                        <PriceRow 
+                        <PriceRow
                             label="ส่วนลด"
                             value={history.discount}
                             negative
                         />
-                        <PriceRow 
+                        <PriceRow
                             label="ค่าจัดส่ง"
                             value={history.shippingFee}
                         />
                         <div className="border-t border-dashed border-stone-200 pt-4 mt-2">
-                            <PriceRow 
+                            <PriceRow
                                 label="ยอดสุทธิ"
                                 value={history.grandTotal}
                                 big
@@ -302,7 +318,7 @@ export default function CustomerHistoryDetailPage() {
                     <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl">
                         <h3 className="text-xl font-bold text-stone-900">ส่งเคลม / คืนสินค้า</h3>
                         <p className="mt-2 text-sm text-stone-500 mb-4">สินค้า: {selectedItem?.productNameSnapshot || selectedItem?.productName}</p>
-                        
+
                         <div className="space-y-4">
                             <div>
                                 <label htmlFor="claimType" className="block text-sm font-semibold text-stone-700 mb-1">ความต้องการ</label>
@@ -326,36 +342,49 @@ export default function CustomerHistoryDetailPage() {
                                     value={claimForm.quantity}
                                     onChange={e => setClaimForm({...claimForm, quantity: Number(e.target.value)})}
                                 />
-                            </div>                        
+                            </div>
                         </div>
 
-                        <div>
+                        {/* 🟢 ส่วนปรับปรุง UI รูปภาพ */}
+                        <div className="mt-4">
                             <label htmlFor="claimImage" className="block text-xs font-semibold text-stone-700 mb-1">รูปถ่ายสินค้าที่เสียหาย</label>
                             <input
                                 id="claimImage"
                                 type="file"
                                 accept="image/*"
                                 capture="environment"
-                                className="w-full text-xs text-stone-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-stone-900 file:text-white hover:file:bg-stone-800 cursor-pointer"
-                                onChange={async (e) => {
-                                    const file = e.target.files[0];
-                                    if (file) {
-                                        setClaimForm({...claimForm, imageFile: file});
-                                    }
-                                }}      
+                                disabled={isUploading}
+                                className="w-full text-xs text-stone-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-stone-900 file:text-white hover:file:bg-stone-800 cursor-pointer disabled:opacity-50"
+                                onChange={handleFileUpload}
                             />
+
+                            {isUploading && (
+                                <div className="text-xs text-blue-600 animate-pulse mt-2">กำลังอัปโหลดรูปภาพขึ้น Cloudinary...</div>
+                            )}
+
+                            {claimForm.imageUrl && (
+                                <div className="mt-2 flex items-center gap-3 bg-stone-50 p-2 rounded-xl border border-stone-200">
+                                    <img src={claimForm.imageUrl} alt="Preview" className="w-16 h-16 object-cover rounded-lg border" />
+                                    <div className="text-xs truncate flex-1">
+                                        <span className="font-semibold text-emerald-600 block">✓ อัปโหลดรูปภาพสำเร็จแล้ว</span>
+                                        <a href={claimForm.imageUrl} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline truncate block mt-0.5">
+                                            {claimForm.imageUrl}
+                                        </a>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
-                        <div>
+                        <div className="mt-4">
                             <label htmlFor="claimDescription" className="block text-sm font-semibold text-stone-700 mb-1">เหตุผลและรายละเอียด</label>
-                            <textarea 
+                            <textarea
                                 id="claimDescription"
-                                rows="2" 
+                                rows="2"
                                 className="w-full rounded-xl border border-stone-300 px-4 py-2"
                                 placeholder="อธิบายปัญหาที่พบ"
                                 value={claimForm.description}
                                 onChange={e => setClaimForm({...claimForm, description: e.target.value})}
-                             ></textarea>
+                            ></textarea>
                         </div>
                         <div className="mt-6 flex justify-end gap-3">
                             <button
@@ -366,9 +395,9 @@ export default function CustomerHistoryDetailPage() {
                             </button>
                             <button
                                 onClick={handleSubmitClaim}
-                                disabled={submittingClaim}
+                                disabled={submittingClaim || isUploading}
                                 className="px-4 py-2 rounded-xl bg-stone-900 text-white font-semibold hover:bg-stone-800 disabled:opacity-50"
-                            >   
+                            >
                                 {submittingClaim ? "กำลังส่ง..." : "ยืนยันการเคลม"}
                             </button>
                         </div>

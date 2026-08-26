@@ -10,12 +10,19 @@ export const adminProductsApi = {
 
   delete: (id) => api.delete(`/api/admin/products/${id}`).then(unwrap),
 
+  uploadImage: (formData) =>
+      api.post("/api/upload/image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }).then(unwrap),
+
   fitments: (productId) =>
-    api.get(`/api/admin/products/${productId}/fitments`).then(unwrap),
+      api.get(`/api/admin/products/${productId}/fitments`).then(unwrap),
   addFitment: (productId, payload) =>
-    api.post(`/api/admin/products/${productId}/fitments`, payload).then(unwrap),
+      api.post(`/api/admin/products/${productId}/fitments`, payload).then(unwrap),
   updateFitment: (productId, fitmentId, payload) =>
-    api.put(`/api/admin/products/${productId}/fitments/${fitmentId}`, payload).then(unwrap),
+      api.put(`/api/admin/products/${productId}/fitments/${fitmentId}`, payload).then(unwrap),
   deleteFitment: (productId, fitmentId) =>
-    api.delete(`/api/admin/products/${productId}/fitments/${fitmentId}`).then(unwrap),
+      api.delete(`/api/admin/products/${productId}/fitments/${fitmentId}`).then(unwrap),
 };
