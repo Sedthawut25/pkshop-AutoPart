@@ -6,15 +6,15 @@ import { useCart } from "./cart/CartContext";
 
 export default function CustomerHistoryPage() {
     const nav = useNavigate();
-    const { add } = useCart(); 
+    const { add } = useCart();
 
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [reviewModal, setReviewModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
-    
+
     // 🟢 เปลี่ยนจากเก็บชิ้นเดียว เป็นเก็บอาร์เรย์ของทุกรีวิวในออเดอร์นั้น
-    const [reviewsData, setReviewsData] = useState([]); 
+    const [reviewsData, setReviewsData] = useState([]);
 
     async function loadOrders() {
         try {
@@ -29,7 +29,7 @@ export default function CustomerHistoryPage() {
                 }
             );
 
-            const filtered = (res.data.data ||  []).filter(
+            const filtered = (res.data.data || []).filter(
                 (o) =>
                     [
                         "DELIVERED",
@@ -55,14 +55,14 @@ export default function CustomerHistoryPage() {
 
     const handleOpenReviewModal = (order) => {
         setSelectedOrder(order);
-        
+
         const initialReviews = (order.items || []).map((item) => ({
             productId: item.product?.id || item.productId,
             productName: item.productNameSnapshot,
             rating: 5,
             comment: ""
         }));
-        
+
         setReviewsData(initialReviews);
         setReviewModal(true);
     };
@@ -95,7 +95,7 @@ export default function CustomerHistoryPage() {
                     )
                 )
             );
-            
+
             alert("ส่งรีวิวสินค้าทั้งหมดในออเดอร์นี้สำเร็จเรียบร้อย!");
             setReviewModal(false);
             setSelectedOrder(null);
@@ -107,7 +107,7 @@ export default function CustomerHistoryPage() {
         }
     }
 
-    if(loading) {
+    if (loading) {
         return (
             <div className="py-20 text-center">
                 กำลังโหลด....
@@ -141,12 +141,12 @@ export default function CustomerHistoryPage() {
                                     </div>
                                     <div className="text-xl font-bold">
                                         {o.orderNumber}
-                                    </div> 
+                                    </div>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     {o.status === "DELIVERED" && (
                                         <button
-                                            onClick={(e) => {e.stopPropagation(); handleOpenReviewModal(o);}}
+                                            onClick={(e) => { e.stopPropagation(); handleOpenReviewModal(o); }}
                                             className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-stone-800 transition"
                                         >
                                             <Star size={16} fill="#facc15" className="text-yellow-400" />
@@ -168,7 +168,7 @@ export default function CustomerHistoryPage() {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="space-y-4 p-5">
                             {(o.items || []).map((item) => (
                                 <div
@@ -176,16 +176,17 @@ export default function CustomerHistoryPage() {
                                     className="flex flex-col gap-4 rounded-2xl border p-4 md:flex-row md:items-center md:justify-between"
                                 >
                                     <div className="flex items-center gap-4">
-                                        <img 
+                                        <img
                                             src={
-                                                item.productImageSnapshot || 
-                                                item.product?.imageUrl || 
-                                                "https://via.placeholder.com/900x675?text=PKSHOP"
-                                            } 
+                                                item.productImageSnapshot ||
+                                                item.product?.imageUrl ||
+                                                "https://placehold.co/600x400?text=PKSHOP"
+                                            }
                                             alt={item.productNameSnapshot || "Product"}
-                                            className="h-24 w-24 rounded-2xl object-cover bg-stone-50" 
+                                            className="h-24 w-24 rounded-2xl object-cover bg-stone-50"
                                             onError={(e) => {
-                                                e.currentTarget.src = "https://via.placeholder.com/900x675?text=No+Image";
+                                                e.currentTarget.onerror = null;
+                                                e.currentTarget.src = "https://placehold.co/600x400?text=No+Image";
                                             }}
                                         />
                                         <div>
@@ -200,9 +201,9 @@ export default function CustomerHistoryPage() {
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="flex flex-col gap-2 sm:flex-row">
-                                        <button 
+                                        <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 const unitPrice = item.lineTotal / item.qty;
@@ -212,7 +213,7 @@ export default function CustomerHistoryPage() {
                                                     unitPrice: unitPrice,
                                                     imageUrl: item.productImageSnapshot || item.product?.imageUrl
                                                 }, item.qty);
-                                                
+
                                                 nav("/customer/cart");
                                             }}
                                             className="rounded-xl border border-stone-300 px-4 py-2 text-sm font-medium hover:bg-stone-50 transition"
@@ -242,7 +243,7 @@ export default function CustomerHistoryPage() {
                                     <div className="font-semibold text-lg text-stone-800">
                                         {index + 1}. {rev.productName}
                                     </div>
-                                    
+
                                     <div className="flex gap-1.5">
                                         {[1, 2, 3, 4, 5].map((s) => (
                                             <button
@@ -251,7 +252,7 @@ export default function CustomerHistoryPage() {
                                                 onClick={() => handleUpdateReviewField(index, "rating", s)}
                                                 className="hover:scale-110 transition-transform"
                                             >
-                                                <Star 
+                                                <Star
                                                     size={28}
                                                     fill={rev.rating >= s ? "#facc15" : "none"}
                                                     className={rev.rating >= s ? "text-yellow-400" : "text-stone-300"}
@@ -259,9 +260,9 @@ export default function CustomerHistoryPage() {
                                             </button>
                                         ))}
                                     </div>
-                                    
+
                                     {/* กล่องข้อความความคิดเห็น */}
-                                    <textarea 
+                                    <textarea
                                         value={rev.comment}
                                         onChange={(e) => handleUpdateReviewField(index, "comment", e.target.value)}
                                         rows={3}

@@ -82,7 +82,7 @@ export default function AdminPromotionsPage() {
     setOpen(true);
   }
 
-  function openEdit(p) {
+  async function openEdit(p) {
     setEditing(p);
     setCode(p.code || "");
     setName(p.name || "");
@@ -96,9 +96,35 @@ export default function AdminPromotionsPage() {
     setUsageLimit(p.usageLimit == null ? "" : String(p.usageLimit));
     setPerUserLimit(p.perUserLimit == null ? "" : String(p.perUserLimit));
     setAppliesTo(p.appliesTo || "ORDER");
-    setProductIds(p.productIds || []);
-    setCategoryIds(p.categoryIds || []);
+    setProductIds(p.productIds || p.targetProductIds || []);
+    setCategoryIds(p.categoryIds || p.targetCategoryIds || []);
     setOpen(true);
+
+    try {
+      const full = await adminPromotionsApi.get(p.id);
+      if (full) {
+        setEditing(full);
+        setCode(full.code || p.code || "");
+        setName(full.name || p.name || "");
+        setPromoType(full.promoType || p.promoType || "PERCENT");
+        setValue(String(full.value ?? p.value ?? "10"));
+        setMaxDiscount(full.maxDiscount == null ? "" : String(full.maxDiscount));
+        setMinOrderAmount(full.minOrderAmount == null ? "" : String(full.minOrderAmount));
+        setStartAt(full.startAt ? toLocalInput(full.startAt) : (p.startAt ? toLocalInput(p.startAt) : ""));
+        setEndAt(full.endAt ? toLocalInput(full.endAt) : (p.endAt ? toLocalInput(p.endAt) : ""));
+        setActive(full.active != null ? !!full.active : !!p.active);
+        setUsageLimit(full.usageLimit == null ? "" : String(full.usageLimit));
+        setPerUserLimit(full.perUserLimit == null ? "" : String(full.perUserLimit));
+        setAppliesTo(full.appliesTo || p.appliesTo || "ORDER");
+
+        const pIds = full.productIds || full.targetProductIds || (full.products ? full.products.map(x => x.id) : []);
+        const cIds = full.categoryIds || full.targetCategoryIds || (full.categories ? full.categories.map(x => x.id) : []);
+        setProductIds(pIds);
+        setCategoryIds(cIds);
+      }
+    } catch (err) {
+      console.error("Error fetching full promotion detail:", err);
+    }
   }
 
   const createMut = useMutation({
@@ -119,7 +145,6 @@ export default function AdminPromotionsPage() {
         appliesTo,
       }),
     onSuccess: async (created) => {
-      // set targets if needed
       await saveTargetsIfNeeded(created.id, appliesTo, productIds, categoryIds);
       setOpen(false);
       await qc.invalidateQueries({ queryKey: ["admin-promotions"] });
@@ -129,7 +154,9 @@ export default function AdminPromotionsPage() {
   const updateMut = useMutation({
     mutationFn: () =>
       adminPromotionsApi.update(editing.id, {
+        code: code.trim(),
         name: name.trim(),
+        description: null,
         promoType,
         value: Number(value),
         maxDiscount: maxDiscount === "" ? null : Number(maxDiscount),
@@ -161,7 +188,6 @@ export default function AdminPromotionsPage() {
     } else if (applies === "CATEGORY") {
       await adminPromotionsApi.setTargets(promoId, { productIds: [], categoryIds: cIds });
     } else {
-      // ORDER ไม่ต้องตั้ง targets แต่เพื่อความชัวร์ ล้าง targets
       await adminPromotionsApi.setTargets(promoId, { productIds: [], categoryIds: [] });
     }
   }
@@ -254,7 +280,6 @@ export default function AdminPromotionsPage() {
                 className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                disabled={!!editing} // edit ห้ามเปลี่ยน code
                 placeholder="เช่น SPRING30"
               />
             </Field>
@@ -405,9 +430,8 @@ export default function AdminPromotionsPage() {
           <div className="flex gap-2">
             <button
               disabled={!canSave}
-              className={`rounded-xl px-4 py-2 text-sm font-medium ${
-                canSave ? "bg-ink text-white hover:opacity-95" : "bg-stone-200 text-stone-500 cursor-not-allowed"
-              }`}
+              className={`rounded-xl px-4 py-2 text-sm font-medium ${canSave ? "bg-ink text-white hover:opacity-95" : "bg-stone-200 text-stone-500 cursor-not-allowed"
+                }`}
               onClick={() => (editing ? updateMut.mutate() : createMut.mutate())}
             >
               บันทึก
@@ -422,7 +446,15 @@ export default function AdminPromotionsPage() {
           </div>
 
           {(createMut.isError || updateMut.isError) ? (
-            <div className="text-sm text-rose-700">บันทึกไม่สำเร็จ (ตรวจสอบข้อมูล/เวลาเริ่ม-สิ้นสุด)</div>
+            <div className="text-sm text-rose-700">
+              บันทึกไม่สำเร็จ (
+              {createMut.error?.response?.data?.message ||
+                updateMut.error?.response?.data?.message ||
+                createMut.error?.message ||
+                updateMut.error?.message ||
+                "ตรวจสอบข้อมูล/เวลาเริ่ม-สิ้นสุด"}
+              )
+            </div>
           ) : null}
         </div>
       </Modal>
@@ -440,13 +472,16 @@ function Field({ label, children }) {
 }
 
 function toLocalInput(iso) {
-  // "2026-03-01T12:00:00" -> "2026-03-01T12:00"
   if (!iso) return "";
+  if (Array.isArray(iso)) {
+    const [y, m, d, hh = 0, mm = 0] = iso;
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${y}-${pad(m)}-${pad(d)}T${pad(hh)}:${pad(mm)}`;
+  }
   return String(iso).slice(0, 16);
 }
 
 function fromLocalInput(v) {
-  // "2026-03-01T12:00" -> "2026-03-01T12:00:00"
   if (!v) return null;
   return v.length === 16 ? `${v}:00` : v;
 }

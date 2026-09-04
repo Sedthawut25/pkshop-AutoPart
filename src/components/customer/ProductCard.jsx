@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export default function ProductCard({ p, to }) {
   const [img, setImg] = useState(
-    p?.imageUrl || "https://via.placeholder.com/600x400?text=PKSHOP"
+    p?.imageUrl || "https://placehold.co/600x400?text=PKSHOP"
   );
 
   return (
@@ -16,9 +16,10 @@ export default function ProductCard({ p, to }) {
         alt={p?.name || "product"}
         className="h-44 w-full rounded-2xl object-cover bg-stone-50"
         loading="lazy"
-        onError={() =>
-          setImg("https://via.placeholder.com/600x400?text=No+Image")
-        }
+        onError={(e) => {
+          e.currentTarget.onerror = null;
+          setImg("https://placehold.co/600x400?text=No+Image");
+        }}
       />
 
       <div className="mt-3 text-sm font-semibold">

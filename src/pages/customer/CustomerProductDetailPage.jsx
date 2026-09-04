@@ -69,12 +69,12 @@ export default function CustomerProductDetailPage() {
         {/* คอลัมน์ซ้าย: รูปภาพ */}
         <div className="lg:col-span-6">
           <img
-            src={p.imageUrl || "https://via.placeholder.com/900x675?text=PKSHOP"}
-            alt={p.name || "Product Thumbnail"}
-            className="h-auto w-full rounded-3xl object-cover bg-white border border-line"
-            loading="lazy"
+            src={p.imageUrl || "https://placehold.co/600x400?text=PKSHOP"}
+            alt={p.name}
+            className="w-full rounded-3xl border border-stone-200 bg-stone-50 object-cover shadow-sm transition hover:shadow-md max-h-[500px]"
             onError={(e) => {
-              e.currentTarget.src = "https://via.placeholder.com/900x675?text=No+Image";
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = "https://placehold.co/600x400?text=No+Image";
             }}
           />
         </div>

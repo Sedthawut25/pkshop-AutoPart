@@ -20,6 +20,7 @@ import {
   formatClaimMoney,
   formatDateTime,
   getApiErrorMessage,
+  getAttachmentUrls,
   pageContent,
   poDetailItems,
   poDisplayName,
@@ -42,8 +43,10 @@ export default function AdminSupplierClaimsPage() {
   const [page, setPage] = useState(0);
   const [openCreate, setOpenCreate] = useState(false);
   const [selectedClaim, setSelectedClaim] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [form, setForm] = useState(initialForm);
-  const [files, setFiles] = useState([]);
+  const [attachmentUrls, setAttachmentUrls] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
   const [notice, setNotice] = useState(null);
 
   const claimsQuery = useQuery({
@@ -74,12 +77,28 @@ export default function AdminSupplierClaimsPage() {
     [selectedItems, form.productId],
   );
 
+  const handleImageUpload = async (event) => {
+    const selectedFiles = Array.from(event.target.files || []);
+    if (selectedFiles.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      const urls = await Promise.all(
+        selectedFiles.map((file) => supplierClaimsApi.uploadAttachment(file))
+      );
+      const validUrls = urls.filter(Boolean);
+      setAttachmentUrls((prev) => [...prev, ...validUrls]);
+    } catch (err) {
+      console.error("Cloudinary upload error:", err);
+      setNotice({ type: "error", text: "เกิดข้อผิดพลาดในการอัปโหลดรูปภาพขึ้น Cloudinary" });
+    } finally {
+      setIsUploading(false);
+      event.target.value = "";
+    }
+  };
+
   const createMut = useMutation({
     mutationFn: async () => {
-      const attachmentUrls = await Promise.all(
-        files.map((file) => supplierClaimsApi.uploadAttachment(file)),
-      );
-
       return supplierClaimsApi.create({
         purchaseOrderId: Number(form.purchaseOrderId),
         productId: Number(form.productId),
@@ -93,7 +112,7 @@ export default function AdminSupplierClaimsPage() {
     onSuccess: async () => {
       setOpenCreate(false);
       setForm(initialForm);
-      setFiles([]);
+      setAttachmentUrls([]);
       setNotice({ type: "success", text: "สร้างเคลมซัพพลายเออร์สำเร็จ" });
       await qc.invalidateQueries({ queryKey: ["admin-supplier-claims"] });
     },
@@ -130,6 +149,7 @@ export default function AdminSupplierClaimsPage() {
     Number(form.productId) > 0 &&
     Number(form.quantity) > 0 &&
     form.description.trim().length > 0 &&
+    !isUploading &&
     !createMut.isPending;
 
   function updateForm(name, value) {
@@ -139,7 +159,7 @@ export default function AdminSupplierClaimsPage() {
   function openCreateModal() {
     setNotice(null);
     setForm(initialForm);
-    setFiles([]);
+    setAttachmentUrls([]);
     setOpenCreate(true);
   }
 
@@ -431,51 +451,58 @@ export default function AdminSupplierClaimsPage() {
               <div className="rounded-xl border border-dashed border-line p-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
-                    <div className="text-sm font-medium">หลักฐานแนบ</div>
+                    <div className="text-sm font-medium">หลักฐานแนบ (รูปภาพ)</div>
                     <div className="text-xs text-muted">
-                      รองรับหลายรูป อัปโหลดตอนกดสร้างเคลม
+                      อัปโหลดรูปภาพขึ้น Cloudinary ทันทีเมื่อเลือกไฟล์
                     </div>
                   </div>
                   <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-line bg-white px-3 py-2 text-sm hover:bg-stone-50">
                     <Upload size={16} />
-                    เลือกรูป
+                    {isUploading ? "กำลังอัปโหลด..." : "เลือกรูปภาพ"}
                     <input
                       className="hidden"
                       type="file"
                       accept="image/*"
                       multiple
-                      onChange={(event) => {
-                        setFiles((current) => [
-                          ...current,
-                          ...Array.from(event.target.files || []),
-                        ]);
-                        event.target.value = "";
-                      }}
+                      disabled={isUploading}
+                      onChange={handleImageUpload}
                     />
                   </label>
                 </div>
 
-                {files.length > 0 ? (
-                  <div className="mt-3 grid gap-2 md:grid-cols-2">
-                    {files.map((file, index) => (
+                {isUploading && (
+                  <div className="mt-2 text-xs font-semibold text-blue-600 animate-pulse">
+                    กำลังอัปโหลดรูปภาพขึ้น Cloudinary...
+                  </div>
+                )}
+
+                {attachmentUrls.length > 0 ? (
+                  <div className="mt-3 grid gap-3 grid-cols-2 md:grid-cols-4">
+                    {attachmentUrls.map((url, index) => (
                       <div
-                        key={`${file.name}-${index}`}
-                        className="flex items-center justify-between rounded-xl border border-line px-3 py-2 text-sm"
+                        key={`${url}-${index}`}
+                        className="group relative rounded-xl border border-line overflow-hidden bg-stone-50 shadow-sm"
                       >
-                        <span className="flex min-w-0 items-center gap-2">
-                          <FileImage size={15} className="shrink-0 text-muted" />
-                          <span className="truncate">{file.name}</span>
-                        </span>
+                        <img
+                          src={url}
+                          alt={`Uploaded evidence ${index + 1}`}
+                          className="h-24 w-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = "https://placehold.co/600x400?text=No+Image";
+                          }}
+                        />
                         <button
                           type="button"
                           onClick={() =>
-                            setFiles((current) =>
-                              current.filter((_, fileIndex) => fileIndex !== index),
+                            setAttachmentUrls((current) =>
+                              current.filter((_, i) => i !== index),
                             )
                           }
-                          className="rounded-lg p-1 hover:bg-stone-100"
+                          className="absolute top-1 right-1 rounded-full bg-black/70 p-1 text-white hover:bg-black transition shadow"
+                          title="ลบรูปนี้"
                         >
-                          <X size={14} />
+                          <X size={12} />
                         </button>
                       </div>
                     ))}
@@ -518,9 +545,32 @@ export default function AdminSupplierClaimsPage() {
           onClose={() => setSelectedClaim(null)}
           onCancel={handleCancelClaim}
           onReceiveReplacement={handleReceiveReplacement}
+          onOpenImage={(url) => setSelectedImage(url)}
           isWorking={cancelMut.isPending || receiveMut.isPending}
         />
       ) : null}
+
+      {/* Image Preview Modal */}
+      {selectedImage && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="relative flex max-h-[90vh] w-full max-w-4xl flex-col items-center justify-center">
+            <button
+              type="button"
+              onClick={() => setSelectedImage(null)}
+              className="absolute -top-10 right-0 rounded-full bg-white/10 p-2 text-white shadow-lg backdrop-blur-md hover:bg-white/20 md:top-0 md:-right-12"
+            >
+              <X className="h-6 w-6 md:h-8 md:w-8" />
+            </button>
+            <div className="flex w-full justify-center overflow-hidden rounded-2xl bg-white p-2 shadow-2xl">
+              <img
+                src={selectedImage}
+                alt="หลักฐานเคลมรูปใหญ่"
+                className="h-auto max-h-[75vh] w-auto max-w-full rounded-xl object-contain md:max-h-[85vh]"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -530,11 +580,13 @@ function ClaimDetailModal({
   onClose,
   onCancel,
   onReceiveReplacement,
+  onOpenImage,
   isWorking,
 }) {
   const canCancel = claim.status === "PENDING";
   const canReceive =
     claim.status === "APPROVED" && claim.claimType === "REPLACEMENT";
+  const attachments = getAttachmentUrls(claim);
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 px-4 py-8">
@@ -578,24 +630,30 @@ function ClaimDetailModal({
           <TextBlock title="รายละเอียดจากแอดมิน" value={claim.description} />
           <TextBlock title="คำตอบจากซัพพลายเออร์" value={claim.supplierResponse || "-"} />
 
-          {claim.attachments?.length > 0 ? (
+          {attachments.length > 0 ? (
             <div>
-              <div className="mb-2 text-sm font-semibold">หลักฐานแนบ</div>
+              <div className="mb-2 text-sm font-semibold">หลักฐานแนบ ({attachments.length} รูป)</div>
               <div className="grid gap-3 md:grid-cols-3">
-                {claim.attachments.map((url) => (
-                  <a
-                    key={url}
-                    href={url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block overflow-hidden rounded-xl border border-line bg-stone-50"
+                {attachments.map((url, idx) => (
+                  <button
+                    key={`${url}-${idx}`}
+                    type="button"
+                    onClick={() => onOpenImage(url)}
+                    className="group relative block h-36 w-full overflow-hidden rounded-xl border border-line bg-stone-50 text-left transition hover:shadow-md"
                   >
                     <img
                       src={url}
-                      alt="claim attachment"
-                      className="h-36 w-full object-cover"
+                      alt={`claim attachment ${idx + 1}`}
+                      className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "https://placehold.co/600x400?text=No+Image";
+                      }}
                     />
-                  </a>
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition duration-200 group-hover:opacity-100">
+                      <Eye className="h-6 w-6 text-white" />
+                    </div>
+                  </button>
                 ))}
               </div>
             </div>

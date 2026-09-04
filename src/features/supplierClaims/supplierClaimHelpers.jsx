@@ -106,3 +106,31 @@ export function poDisplayName(po) {
 export function supplierDisplayName(supplier) {
   return supplier?.fullName || supplier?.name || supplier?.email || "-";
 }
+
+export function getAttachmentUrls(claim) {
+  if (!claim) return [];
+  const list = [];
+
+  const addUrl = (url) => {
+    if (typeof url === "string" && url.trim() && !list.includes(url.trim())) {
+      list.push(url.trim());
+    } else if (url && typeof url === "object") {
+      const u = url.fileUrl || url.imageUrl || url.url || url.path;
+      if (typeof u === "string" && u.trim() && !list.includes(u.trim())) {
+        list.push(u.trim());
+      }
+    }
+  };
+
+  if (Array.isArray(claim.attachments)) {
+    claim.attachments.forEach(addUrl);
+  }
+  if (Array.isArray(claim.attachmentUrls)) {
+    claim.attachmentUrls.forEach(addUrl);
+  }
+  if (claim.imageUrl) {
+    addUrl(claim.imageUrl);
+  }
+
+  return list;
+}

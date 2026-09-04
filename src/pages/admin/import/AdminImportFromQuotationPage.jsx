@@ -76,7 +76,7 @@ export default function AdminImportFromQuotationPage() {
 
       for (const it of items) {
         await adminImportApi.addLotItem(lot.id, {
-          productId: it.product?.id,
+          productId: it.product?.id || it.productId,
           qty: it.qty,
           unitCost: Number(it.quotedUnitCost),
         });
@@ -181,7 +181,7 @@ export default function AdminImportFromQuotationPage() {
 
                     return (
                       <tr key={key} className="border-b border-line">
-                        <td className="py-3">{it.product?.name || `#${it.product?.id || "-"}`}</td>
+                        <td className="py-3">{it.product?.name || it.productName || it.productNameSnapshot || it.name || (it.productId || it.product?.id ? `#${it.productId || it.product?.id}` : "-")}</td>
                         <td className="py-3 text-right">{qty}</td>
                         <td className="py-3 text-right">{unit.toLocaleString()}</td>
                         <td className="py-3 text-right">{line.toLocaleString()}</td>

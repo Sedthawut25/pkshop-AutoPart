@@ -41,9 +41,9 @@ export default function AdminPoListPage() {
           >
             <option value="">ทุกสถานะ</option>
             <option value="SENT">ส่งแล้ว</option>
-            <option value="DRAFT">ฉบับร่าง</option>
             <option value="QUOTED">ได้รับใบเสนอราคา</option>
             <option value="CONFIRMED">ได้รับการอนุมัติ</option>
+            <option value="REJECTED">ปฏิเสธแล้ว</option>
           </select>
 
           <input
@@ -144,7 +144,9 @@ function Badge({ tone = "gray", children }) {
         ? "bg-yellow-50 text-yellow-800 border-yellow-200"
         : tone === "green"
           ? "bg-green-50 text-green-700 border-green-200"
-          : "bg-stone-50 text-stone-700 border-stone-200";
+          : tone === "red"
+            ? "bg-red-50 text-red-700 border-red-200"
+            : "bg-stone-50 text-stone-700 border-stone-200";
 
   return (
     <span
@@ -158,10 +160,12 @@ function Badge({ tone = "gray", children }) {
 function StatusBadge({ status }) {
   const s = (status || "").toUpperCase();
 
-  if (s === "DRAFT") return <Badge tone="gray">ฉบับร่าง</Badge>;
   if (s === "SENT") return <Badge tone="blue">ส่งแล้ว</Badge>;
-  if (s === "QUOTED") return <Badge tone="yellow">เสนอราคาแล้ว</Badge>;
-  if (s === "CONFIRMED") return <Badge tone="green">ได้รับการอนุมัติ</Badge>;
+  if (s === "QUOTED") return <Badge tone="yellow">ได้รับใบเสนอราคา</Badge>;
+  if (s === "CONFIRMED" || s === "ACCEPTED" || s === "APPROVED")
+    return <Badge tone="green">ได้รับการอนุมัติ</Badge>;
+  if (s === "REJECTED" || s === "REJECT")
+    return <Badge tone="red">ปฏิเสธแล้ว</Badge>;
 
   return <Badge tone="gray">{status || "UNKNOWN"}</Badge>;
 }

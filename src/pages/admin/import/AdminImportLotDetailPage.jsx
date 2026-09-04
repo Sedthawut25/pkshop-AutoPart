@@ -126,7 +126,7 @@ export default function AdminImportLotDetailPage() {
                 <tbody>
                   {items.map((it) => (
                     <tr key={it.id} className="border-b border-line">
-                      <td className="py-3">{it.product?.name || `#${it.product?.id || "-"}`}</td>
+                      <td className="py-3">{it.product?.name || it.productName || it.productNameSnapshot || it.name || (it.productId || it.product?.id ? `#${it.productId || it.product?.id}` : "-")}</td>
                       <td className="py-3 text-right">{it.qty}</td>
                       <td className="py-3 text-right">{Number(it.unitCost || 0).toLocaleString()}</td>
                       <td className="py-3 text-right">{Number(it.lineCost || 0).toLocaleString()}</td>

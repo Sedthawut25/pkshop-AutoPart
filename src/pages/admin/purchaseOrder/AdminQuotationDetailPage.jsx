@@ -23,6 +23,7 @@ export default function AdminQuotationDetailPage() {
       });
       await qc.invalidateQueries({ queryKey: ["admin-po-detail", poId] });
       await qc.invalidateQueries({ queryKey: ["admin-po-quotations", poId] });
+      await qc.invalidateQueries({ queryKey: ["admin-po-list"] });
     },
   });
 
@@ -149,7 +150,7 @@ export default function AdminQuotationDetailPage() {
                   {items.map((it) => (
                     <tr key={it.id} className="border-b border-line">
                       <td className="py-3">
-                        {it.product?.name || `#${it.product?.id || "-"}`}
+                        {it.product?.name || it.productName || it.productNameSnapshot || it.name || (it.productId || it.product?.id ? `#${it.productId || it.product?.id}` : "-")}
                       </td>
                       <td className="py-3 text-right">{it.qty}</td>
                       <td className="py-3 text-right">{it.quotedUnitCost}</td>

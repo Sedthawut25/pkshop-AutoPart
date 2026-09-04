@@ -10,6 +10,7 @@ import {
   formatClaimMoney,
   formatDateTime,
   getApiErrorMessage,
+  getAttachmentUrls,
   supplierDisplayName,
 } from "../../../features/supplierClaims/supplierClaimHelpers";
 
@@ -19,6 +20,7 @@ export default function SupplierClaimsPage() {
   const [selectedId, setSelectedId] = useState(null);
   const [response, setResponse] = useState("");
   const [notice, setNotice] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const listQuery = useQuery({
     queryKey: ["supplier-claims", status],
@@ -150,6 +152,7 @@ export default function SupplierClaimsPage() {
                 <tr className="border-b border-line">
                   <th className="py-3 text-left font-medium">เลขเคลม</th>
                   <th className="py-3 text-left font-medium">สินค้า</th>
+                  <th className="py-3 text-center font-medium">รูปหลักฐาน</th>
                   <th className="py-3 text-left font-medium">PO / Admin</th>
                   <th className="py-3 text-right font-medium">จำนวน</th>
                   <th className="py-3 text-right font-medium">ยอดเงิน</th>
@@ -159,49 +162,77 @@ export default function SupplierClaimsPage() {
               </thead>
 
               <tbody>
-                {rows.map((claim) => (
-                  <tr key={claim.id} className="border-b border-line align-top">
-                    <td className="py-3">
-                      <div className="font-medium">#{claim.id}</div>
-                      <div className="text-xs text-muted">
-                        {formatDateTime(claim.createdAt)}
-                      </div>
-                    </td>
-                    <td className="py-3">
-                      <div className="font-medium">{claim.productName || "-"}</div>
-                      <div className="text-xs text-muted">
-                        {claimTypeLabel(claim.claimType)}
-                      </div>
-                    </td>
-                    <td className="py-3">
-                      <div>{claim.poNumber || `PO-${claim.purchaseOrderId}`}</div>
-                      <div className="text-xs text-muted">
-                        {supplierDisplayName(claim.admin)}
-                      </div>
-                    </td>
-                    <td className="py-3 text-right">{claim.quantity ?? "-"}</td>
-                    <td className="py-3 text-right">
-                      {formatClaimMoney(claim.refundAmount)}
-                    </td>
-                    <td className="py-3">
-                      <ClaimStatusBadge status={claim.status} />
-                    </td>
-                    <td className="py-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => openDetail(claim)}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-line bg-white px-3 py-1.5 text-sm hover:bg-stone-50"
-                      >
-                        <Eye size={15} />
-                        ดูรายละเอียด
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {rows.map((claim) => {
+                  const attachments = getAttachmentUrls(claim);
+                  return (
+                    <tr key={claim.id} className="border-b border-line align-middle">
+                      <td className="py-3">
+                        <div className="font-medium">#{claim.id}</div>
+                        <div className="text-xs text-muted">
+                          {formatDateTime(claim.createdAt)}
+                        </div>
+                      </td>
+                      <td className="py-3">
+                        <div className="font-medium">{claim.productName || "-"}</div>
+                        <div className="text-xs text-muted">
+                          {claimTypeLabel(claim.claimType)}
+                        </div>
+                      </td>
+                      <td className="py-3 text-center">
+                        {attachments.length > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedImage(attachments[0])}
+                            className="group relative inline-block h-12 w-12 overflow-hidden rounded-xl border border-line bg-stone-50"
+                            title="คลิกเพื่อดูรูปภาพขนาดใหญ่"
+                          >
+                            <img
+                              src={attachments[0]}
+                              alt="หลักฐาน"
+                              className="h-full w-full object-cover transition duration-200 group-hover:scale-110"
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = "https://placehold.co/600x400?text=No+Image";
+                              }}
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition duration-200 group-hover:opacity-100">
+                              <Eye className="h-4 w-4 text-white" />
+                            </div>
+                          </button>
+                        ) : (
+                          <span className="text-xs text-muted">ไม่มีรูปภาพ</span>
+                        )}
+                      </td>
+                      <td className="py-3">
+                        <div>{claim.poNumber || `PO-${claim.purchaseOrderId}`}</div>
+                        <div className="text-xs text-muted">
+                          {supplierDisplayName(claim.admin)}
+                        </div>
+                      </td>
+                      <td className="py-3 text-right">{claim.quantity ?? "-"}</td>
+                      <td className="py-3 text-right">
+                        {formatClaimMoney(claim.refundAmount)}
+                      </td>
+                      <td className="py-3">
+                        <ClaimStatusBadge status={claim.status} />
+                      </td>
+                      <td className="py-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => openDetail(claim)}
+                          className="inline-flex items-center justify-center gap-2 rounded-xl border border-line bg-white px-3 py-1.5 text-sm hover:bg-stone-50"
+                        >
+                          <Eye size={15} />
+                          ดูรายละเอียด
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
 
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-sm text-muted">
+                    <td colSpan={8} className="py-8 text-center text-sm text-muted">
                       ไม่พบรายการเคลม
                     </td>
                   </tr>
@@ -221,9 +252,32 @@ export default function SupplierClaimsPage() {
           onClose={() => setSelectedId(null)}
           onApprove={() => respond("APPROVE")}
           onReject={() => respond("REJECT")}
+          onOpenImage={(url) => setSelectedImage(url)}
           isWorking={respondMut.isPending}
         />
       ) : null}
+
+      {/* Image Preview Modal */}
+      {selectedImage && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="relative flex max-h-[90vh] w-full max-w-4xl flex-col items-center justify-center">
+            <button
+              type="button"
+              onClick={() => setSelectedImage(null)}
+              className="absolute -top-10 right-0 rounded-full bg-white/10 p-2 text-white shadow-lg backdrop-blur-md hover:bg-white/20 md:top-0 md:-right-12"
+            >
+              <X className="h-6 w-6 md:h-8 md:w-8" />
+            </button>
+            <div className="flex w-full justify-center overflow-hidden rounded-2xl bg-white p-2 shadow-2xl">
+              <img
+                src={selectedImage}
+                alt="หลักฐานเคลมรูปใหญ่"
+                className="h-auto max-h-[75vh] w-auto max-w-full rounded-xl object-contain md:max-h-[85vh]"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -236,9 +290,11 @@ function SupplierClaimDetailModal({
   onClose,
   onApprove,
   onReject,
+  onOpenImage,
   isWorking,
 }) {
   const isPending = claim?.status === "PENDING";
+  const attachments = getAttachmentUrls(claim);
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 px-4 py-8">
@@ -286,24 +342,30 @@ function SupplierClaimDetailModal({
 
               <TextBlock title="รายละเอียดจากแอดมิน" value={claim.description} />
 
-              {claim.attachments?.length > 0 ? (
+              {attachments.length > 0 ? (
                 <div>
-                  <div className="mb-2 text-sm font-semibold">หลักฐานแนบ</div>
+                  <div className="mb-2 text-sm font-semibold">หลักฐานแนบ ({attachments.length} รูป)</div>
                   <div className="grid gap-3 md:grid-cols-3">
-                    {claim.attachments.map((url) => (
-                      <a
-                        key={url}
-                        href={url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="block overflow-hidden rounded-xl border border-line bg-stone-50"
+                    {attachments.map((url, idx) => (
+                      <button
+                        key={`${url}-${idx}`}
+                        type="button"
+                        onClick={() => onOpenImage(url)}
+                        className="group relative block h-36 w-full overflow-hidden rounded-xl border border-line bg-stone-50 text-left transition hover:shadow-md"
                       >
                         <img
                           src={url}
-                          alt="claim attachment"
-                          className="h-36 w-full object-cover"
+                          alt={`claim attachment ${idx + 1}`}
+                          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = "https://placehold.co/600x400?text=No+Image";
+                          }}
                         />
-                      </a>
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition duration-200 group-hover:opacity-100">
+                          <Eye className="h-6 w-6 text-white" />
+                        </div>
+                      </button>
                     ))}
                   </div>
                 </div>

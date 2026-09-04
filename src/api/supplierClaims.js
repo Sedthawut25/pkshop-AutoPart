@@ -62,7 +62,7 @@ export const supplierClaimsApi = {
     const formData = new FormData();
     formData.append("file", file);
     return api
-      .post("/api/upload/claim-image", formData, {
+      .post("/api/upload/image", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       .then(unwrap);
