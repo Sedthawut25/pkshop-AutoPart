@@ -68,12 +68,12 @@ function HomeRedirect() {
   const token = authStorage.token();
   const role = authStorage.role();
 
-  if (!token) return <Navigate to="/login" replace />;
+  if (!token) return <Navigate to="/customer" replace />;
   if (role === "ADMIN") return <Navigate to="/admin/dashboard" replace />;
   if (role === "SUPPLIER") return <Navigate to="/supplier/po" replace />;
   if (role === "CUSTOMS") return <Navigate to="/customs/documents" replace />;
 
-  return <Navigate to="/login" replace />;
+  return <Navigate to="/customer" replace />;
 }
 
 export default function AppRouter() {
@@ -164,15 +164,25 @@ export default function AppRouter() {
           </Route>
         </Route>
 
-        {/* ✅ customer */}
-        <Route element={<ProtectedRoute roles={["CUSTOMER"]} />}>
-          <Route path="/customer" element={<CustomerLayout />}>
-            <Route index element={<CustomerHomePage />} />
-            <Route path="shop" element={<CustomerShopPage />} />
-            <Route
-              path="/customer/product/:id"
-              element={<CustomerProductDetailPage />}
+        {/* Customer storefront: browsing is public, ordering remains protected. */}
+        <Route element={<CustomerLayout />}>
+          <Route path="/customer" element={<CustomerHomePage />} />
+          <Route path="/customer/shop" element={<CustomerShopPage />} />
+          <Route
+            path="/customer/product/:id"
+            element={<CustomerProductDetailPage />}
+          />
+        </Route>
+
+        <Route
+          element={
+            <ProtectedRoute
+              roles={["CUSTOMER"]}
+              redirectTo="/customer/login"
             />
+          }
+        >
+          <Route path="/customer" element={<CustomerLayout />}>
             <Route path="cart" element={<CustomerCartPage />} />
             <Route path="checkout" element={<CustomerCheckoutPage />} />
             <Route path="orders" element={<MyOrderPage />} />

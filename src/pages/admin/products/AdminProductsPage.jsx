@@ -10,8 +10,10 @@ export default function AdminProductsPage() {
   const qc = useQueryClient();
 
   const [keyword, setKeyword] = useState("");
+  const [filterCategoryId, setFilterCategoryId] = useState("");
   const [page, setPage] = useState(0);
   const size = 12;
+  const requestSize = filterCategoryId ? 1000 : size;
 
   // product modal
   const [openProduct, setOpenProduct] = useState(false);
@@ -33,10 +35,11 @@ export default function AdminProductsPage() {
   const [isUploading, setIsUploading] = useState(false);
 
   const params = useMemo(() => {
-    const p = { page, size };
+    const p = { page: filterCategoryId ? 0 : page, size: requestSize };
     if (keyword.trim()) p.keyword = keyword.trim();
+    if (filterCategoryId) p.categoryId = Number(filterCategoryId);
     return p;
-  }, [keyword, page]);
+  }, [keyword, filterCategoryId, page, requestSize]);
 
   const productsQ = useQuery({
     queryKey: ["admin-products", params],
@@ -50,8 +53,11 @@ export default function AdminProductsPage() {
 
   const categories = categoriesQ.data || [];
   const pageData = productsQ.data;
-  const rows = pageData?.content || [];
-  const totalPages = pageData?.totalPages ?? 1;
+  const allRows = pageData?.content || [];
+  const rows = filterCategoryId
+      ? allRows.filter((product) => String(product.category?.id) === filterCategoryId)
+      : allRows;
+  const totalPages = filterCategoryId ? 1 : (pageData?.totalPages ?? 1);
 
   function resetForm() {
     setSku("");
@@ -204,6 +210,22 @@ export default function AdminProductsPage() {
                   setPage(0);
                 }}
             />
+            <select
+                className="w-full md:w-auto rounded-xl border border-line bg-white px-3 py-2 text-sm"
+                value={filterCategoryId}
+                onChange={(e) => {
+                  setFilterCategoryId(e.target.value);
+                  setPage(0);
+                }}
+                aria-label="กรองตามหมวดหมู่"
+            >
+              <option value="">ทุกหมวดหมู่</option>
+              {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+              ))}
+            </select>
             <button
                 className="w-full md:w-auto rounded-xl bg-ink px-4 py-2 text-sm font-medium text-white hover:opacity-95"
                 onClick={openCreate}
@@ -212,6 +234,12 @@ export default function AdminProductsPage() {
             </button>
           </div>
         </div>
+
+        {filterCategoryId ? (
+            <div className="text-xs text-muted">
+              กำลังแสดงสินค้าในหมวดหมู่: {categories.find((category) => String(category.id) === filterCategoryId)?.name || "-"}
+            </div>
+        ) : null}
 
         <Card className="p-0 md:p-5 overflow-hidden">
           {productsQ.isLoading ? (

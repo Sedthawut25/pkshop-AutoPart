@@ -40,16 +40,16 @@ const nav = [
 
 export default function Sidebar({ onClose }) {
   return (
-    <aside className="flex h-full min-h-screen w-full flex-col border-r border-line bg-white sticky top-0">
+    <aside className="flex h-full min-h-screen w-full flex-col border-r border-line/80 bg-white/90 shadow-[8px_0_30px_rgba(23,33,31,0.03)] sticky top-0">
       {/* โลโก้ */}
-      <div className="px-5 py-5 shrink-0">
+      <div className="shrink-0 border-b border-line/70 px-5 py-6">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-ink text-white flex items-center justify-center font-bold text-lg shadow-sm">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand text-lg font-bold text-ink shadow-[0_8px_18px_rgba(15,118,110,0.25)]">
             PK
           </div>
           <div>
-            <div className="text-sm font-bold text-ink">PKSHOP</div>
-            <div className="text-xs text-stone-500 font-medium">Admin </div>
+            <div className="text-sm font-extrabold tracking-tight text-ink">PKSHOP</div>
+            <div className="text-xs font-medium text-muted">Admin workspace</div>
           </div>
         </div>
       </div>
@@ -66,10 +66,10 @@ export default function Sidebar({ onClose }) {
             }}
             className={({ isActive }) =>
               [
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors duration-200 font-medium",
+                "flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
                 isActive
-                  ? "bg-stone-100 text-ink"
-                  : "text-stone-500 hover:bg-stone-50 hover:text-ink",
+                  ? "bg-brand-soft text-brand-dark shadow-sm"
+                  : "text-muted hover:bg-paper hover:text-ink",
               ].join(" ")
             }
           >

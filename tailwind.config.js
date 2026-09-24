@@ -4,16 +4,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        paper: "#f7f7f5",
-        ink: "#111827",
-        line: "#e5e7eb",
-        muted: "#6b7280",
+        paper: "#f6f8f7",
+        ink: "#17211f",
+        line: "#dce5e2",
+        muted: "#6b7b77",
+        brand: "#0f766e",
+        "brand-dark": "#115e59",
+        "brand-soft": "#e5f3f0",
+        coral: "#e76f51",
       },
       borderRadius: {
         xl2: "1rem",
       },
       boxShadow: {
-        soft: "0 10px 25px rgba(0,0,0,0.08)",
+        soft: "0 14px 35px rgba(23, 33, 31, 0.08)",
+        lift: "0 18px 45px rgba(23, 33, 31, 0.12)",
       },
     },
   },

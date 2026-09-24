@@ -137,7 +137,7 @@ export default function CustomsDocumentDetailPage() {
           </div>
 
           {/* Info */}
-          <Card className="p-5">
+          <Card className="p-4 sm:p-5">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <Info label="Lot ID" value={lot?.id ?? "-"} />
               <Info label="เลข Lot" value={lot?.lotNumber ?? "-"} />
@@ -157,7 +157,7 @@ export default function CustomsDocumentDetailPage() {
           </Card>
 
           {/* Items */}
-          <Card className="p-5">
+          <Card className="p-4 sm:p-5">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm font-semibold">รายละเอียดสินค้าในเอกสาร</div>
@@ -167,7 +167,7 @@ export default function CustomsDocumentDetailPage() {
             </div>
 
             <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full min-w-[620px] text-sm">
                 <thead className="text-xs text-muted">
                   <tr className="border-b border-line">
                     <th className="py-3 text-left font-medium">สินค้า</th>
@@ -203,7 +203,7 @@ export default function CustomsDocumentDetailPage() {
           </Card>
 
           {/* Decision */}
-          <Card className="p-5">
+          <Card className="p-4 sm:p-5">
             <div className="text-sm font-semibold">ความเห็นเจ้าหน้าที่</div>
             <div className="text-xs text-muted">ระบุเหตุผลเมื่อปฏิเสธ หรือหมายเหตุเมื่ออนุมัติ</div>
 

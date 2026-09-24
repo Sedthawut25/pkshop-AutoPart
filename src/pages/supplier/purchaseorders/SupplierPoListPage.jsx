@@ -46,14 +46,14 @@ export default function SupplierPoListPage() {
         </div>
       </div>
 
-      <Card className="p-5">
+      <Card className="p-4 sm:p-5">
         {q.isLoading ? (
           <div className="text-sm text-muted">กำลังโหลด...</div>
         ) : q.isError ? (
           <div className="text-sm text-rose-700">โหลดรายการไม่สำเร็จ</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[760px] text-sm">
               <thead className="text-xs text-muted">
                 <tr className="border-b border-line">
                   <th className="py-3 text-left font-medium">เลข PO</th>
