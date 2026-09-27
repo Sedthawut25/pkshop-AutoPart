@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { authStorage } from "../../../utils/authStorage";
+import api from "../../../api/axios";
 
 export default function AdminRequestPage() {
     const [requests, setRequests] = useState([]);
@@ -19,14 +19,9 @@ export default function AdminRequestPage() {
 
     const fetchRequest = async () => {
         try {
-            const response = await fetch("http://localhost:8080/api/admin/requests", {
-                headers: {
-                    Authorization: `Bearer ${authStorage.token()}`,
-                },
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setRequests(data);
+            const response = await api.get("/api/admin/requests");
+            if (response.data) {
+                setRequests(response.data);
             }
         }
         catch (err) {
@@ -45,16 +40,9 @@ export default function AdminRequestPage() {
         if(!window.confirm(`ต้องการเปลี่ยนสถานะเป็น "${newStatus}" ใช่หรือไม่`)) return;
 
         try {
-            const response = await fetch(`http://localhost:8080/api/admin/requests/${id}/status`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${authStorage.token()}`,
-                },
-                body: JSON.stringify({status: newStatus}),
-            });
+            const response = await api.put(`/api/admin/requests/${id}/status`, { status: newStatus });
 
-            if(response.ok) {
+            if(response.status === 200) {
                 alert("อัปเดตสถานะเรียบร้อย");
                 fetchRequest();
             }

@@ -1,4 +1,4 @@
-import axios from "axios";
+import { api } from "../../api/axios";
 import { PackageCheck, RotateCcw, Star, XCircle } from "lucide-react";
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
@@ -18,16 +18,7 @@ export default function CustomerHistoryPage() {
 
     async function loadOrders() {
         try {
-            const token = localStorage.getItem("pk_token");
-
-            const res = await axios.get(
-                "http://localhost:8080/api/customer/orders/history",
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+            const res = await api.get("/api/customer/orders/history");
 
             const filtered = (res.data.data || []).filter(
                 (o) =>
@@ -76,23 +67,13 @@ export default function CustomerHistoryPage() {
 
     async function submitReview() {
         try {
-            const token = localStorage.getItem("pk_token");
-
             await Promise.all(
                 reviewsData.map((rev) =>
-                    axios.post(
-                        `http://localhost:8080/api/customer/reviews/${selectedOrder.id}`,
-                        {
-                            productId: rev.productId,
-                            rating: rev.rating,
-                            comment: rev.comment,
-                        },
-                        {
-                            headers: {
-                                Authorization: `Bearer ${token}`,
-                            },
-                        }
-                    )
+                    api.post(`/api/customer/reviews/${selectedOrder.id}`, {
+                        productId: rev.productId,
+                        rating: rev.rating,
+                        comment: rev.comment,
+                    })
                 )
             );
 

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../../api/axios';
 import { Package, Truck } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
 
@@ -12,13 +12,8 @@ export default function CustomerClaimsPage() {
 
     const fetchClaims = async () => {
         try {
-            const token = localStorage.getItem("pk_token");
 
-            const res = await axios.get("http://localhost:8080/api/customer/claims", {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-            });
+            const res = await api.get("/api/customer/claims");
 
             if (res.data.success) {
                 setClaims(res.data.data || []);

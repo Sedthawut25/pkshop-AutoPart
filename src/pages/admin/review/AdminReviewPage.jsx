@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../../../api/axios";
 import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -7,16 +7,7 @@ export default function AdminReviewPage() {
 
     async function loadReviews() {
         try {
-            const token = localStorage.getItem("pk_token");
-
-            const res = await axios.get(
-                "http://localhost:8080/api/admin/reviews",
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+            const res = await api.get("/api/admin/reviews");
             setReviews(res.data.data || []);
         }
         catch(err) {

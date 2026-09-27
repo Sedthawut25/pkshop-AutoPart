@@ -1,6 +1,6 @@
-import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from "react-router-dom";
+import { api } from "../../api/axios";
 
 export default function MyOrderPage() {
     const [orders, setOrders] = useState([]);
@@ -9,16 +9,7 @@ export default function MyOrderPage() {
 
     async function loadOrders() {
         try {
-            const token = localStorage.getItem("pk_token");
-
-            const res = await axios.get (
-                "http://localhost:8080/api/customer/orders/active",
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                },
-            );
+            const res = await api.get("/api/customer/orders/active");
             setOrders(res.data.data || []);
         }
         catch (err) {

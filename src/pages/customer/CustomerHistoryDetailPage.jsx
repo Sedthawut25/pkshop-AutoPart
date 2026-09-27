@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../../api/axios";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -24,16 +24,7 @@ export default function CustomerHistoryDetailPage() {
 
     async function loadHistory() {
         try {
-            const token = localStorage.getItem("pk_token");
-
-            const res = await axios.get(
-                `http://localhost:8080/api/customer/orders/${historyId}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+            const res = await api.get(`/api/customer/orders/${historyId}`);
             setHistory(res.data.data);
         }
         catch(err) {
@@ -72,15 +63,9 @@ export default function CustomerHistoryDetailPage() {
         formData.append("file", file);
 
         try {
-            const token = localStorage.getItem("pk_token");
-            const uploadRes = await axios.post(
-                "http://localhost:8080/api/upload/image",
-                formData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
+            const uploadRes = await api.post(
+                "/api/upload/image",
+                formData
             );
 
             const uploadedUrl = uploadRes.data?.data || uploadRes.data;
@@ -105,10 +90,8 @@ export default function CustomerHistoryDetailPage() {
 
         setSubmittingClaim(true);
         try {
-            const token = localStorage.getItem("pk_token");
-
-            await axios.post(
-                "http://localhost:8080/api/customer/claims",
+            await api.post(
+                "/api/customer/claims",
                 {
                     orderId: Number(historyId),
                     productId: selectedItem.productId || selectedItem.product?.id || selectedItem.id,

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { authStorage } from "../../utils/authStorage";
+import api from "../../api/axios";
 
 export default function CustomerRequestPage() {
     const [requests, setRequests] = useState([]);
@@ -22,15 +22,9 @@ export default function CustomerRequestPage() {
 
     const fetchRequest = async () => {
         try {
-            const response = await fetch("http://localhost:8080/api/customer/requests", {
-                headers: {
-                    Authorization: `Bearer ${authStorage.token()}`,
-                },
-            });
-            
-            if(response.ok){
-                const data = await response.json();
-                console.log("📌 ข้อมูลที่ได้รับจาก API:", data); // พิมพ์ค่าออกมาดู
+            const response = await api.get("/api/customer/requests");
+            const data = response.data;
+                console.log("📌 ข้อมูลที่ได้รับจาก API:", data);
                 
                 // เช็กว่าข้อมูลที่ส่งมาเป็น Array โดยตรง หรือถูกห่อมาใน { data: [...] }
                 if (Array.isArray(data)) {
@@ -43,9 +37,6 @@ export default function CustomerRequestPage() {
                     console.log("⚠️ รูปแบบข้อมูลไม่ตรงกับที่คาดไว้", data);
                     setRequests([]);
                 }
-            } else {
-                console.error("❌ ดึงข้อมูลไม่สำเร็จ HTTP Status:", response.status);
-            }
         }
         catch(err) {
             console.error("❌ Error fetching", err);
@@ -64,16 +55,9 @@ export default function CustomerRequestPage() {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch("http://localhost:8080/api/customer/requests", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${authStorage.token()}`,
-                },
-                body: JSON.stringify(formData),
-            });
+            const response = await api.post("/api/customer/requests", formData);
 
-            if(response.ok) {
+            if(response.status === 200 || response.status === 201) {
                 alert("ส่งคำขออะไหล่เรียบร้อยแล้ว");
                 setFormData({partName: "", carBrand: "", carModel: "", description: ""});
                 fetchRequest(); // รีเฟรชตารางทันทีหลังส่งข้อมูลสำเร็จ

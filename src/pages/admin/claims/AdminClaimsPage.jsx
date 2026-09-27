@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../../../api/axios";
 import { useEffect, useState } from "react";
 import { Eye, Check, X } from "lucide-react";
 
@@ -15,10 +15,7 @@ export default function AdminClaimsPage() {
 
     const fetchAllClaims = async () => {
         try {
-            const token = localStorage.getItem("pk_token");
-            const res = await axios.get("http://localhost:8080/api/admin/claims", {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.get("/api/admin/claims");
             if (res.data.success) {
                 const responseData = res.data.data;
                 const claimsArray = responseData?.content || responseData || [];
@@ -38,12 +35,7 @@ export default function AdminClaimsPage() {
 
         try {
             setActionLoading(true);
-            const token = localStorage.getItem("pk_token");
-            
-            const res = await axios.put(`http://localhost:8080/api/admin/claims/${claimId}/status`, 
-                { status: newStatus },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            const res = await api.put(`/api/admin/claims/${claimId}/status`, { status: newStatus });
 
             if (res.data.success) {
                 alert(res.data.message || "อัปเดตสถานะคำขอเคลมสำเร็จ!");

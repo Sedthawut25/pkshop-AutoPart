@@ -1,6 +1,6 @@
-import axios from "axios";
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom";
+import { api } from "../../api/axios";
 
 export default function CustomerOrderDetailPage() {
     const {orderId} = useParams();
@@ -11,16 +11,7 @@ export default function CustomerOrderDetailPage() {
 
     async function loadOrders() {
         try {
-            const token = localStorage.getItem("pk_token");
-
-            const res = await axios.get(
-                `http://localhost:8080/api/customer/orders/${orderId}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+            const res = await api.get(`/api/customer/orders/${orderId}`);
             setOrder(res.data.data);
         }
         catch(err) {
