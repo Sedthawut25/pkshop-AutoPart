@@ -10,8 +10,10 @@ export default function AdminProductsPage() {
   const qc = useQueryClient();
 
   const [keyword, setKeyword] = useState("");
+  const [filterCategoryId, setFilterCategoryId] = useState("");
   const [page, setPage] = useState(0);
   const size = 12;
+  const requestSize = filterCategoryId ? 1000 : size;
 
   // product modal
   const [openProduct, setOpenProduct] = useState(false);
@@ -33,10 +35,11 @@ export default function AdminProductsPage() {
   const [isUploading, setIsUploading] = useState(false);
 
   const params = useMemo(() => {
-    const p = { page, size };
+    const p = { page: filterCategoryId ? 0 : page, size: requestSize };
     if (keyword.trim()) p.keyword = keyword.trim();
+    if (filterCategoryId) p.categoryId = Number(filterCategoryId);
     return p;
-  }, [keyword, page]);
+  }, [keyword, filterCategoryId, page, requestSize]);
 
   const productsQ = useQuery({
     queryKey: ["admin-products", params],
@@ -50,8 +53,11 @@ export default function AdminProductsPage() {
 
   const categories = categoriesQ.data || [];
   const pageData = productsQ.data;
-  const rows = pageData?.content || [];
-  const totalPages = pageData?.totalPages ?? 1;
+  const allRows = pageData?.content || [];
+  const rows = filterCategoryId
+      ? allRows.filter((product) => String(product.category?.id) === filterCategoryId)
+      : allRows;
+  const totalPages = filterCategoryId ? 1 : (pageData?.totalPages ?? 1);
 
   function resetForm() {
     setSku("");
@@ -133,7 +139,7 @@ export default function AdminProductsPage() {
       importCostAvg !== "" &&
       !(createMut.isPending || updateMut.isPending);
 
-  // 🟢 แก้ไขส่วนการอัปโหลดรูปภาพ ป้องกัน Error 403 Forbidden
+  // 🟢 ปรับปรุงการอัปโหลดรูปภาพให้รองรับ response format ต่างๆ และใช้ pk_token
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -143,13 +149,11 @@ export default function AdminProductsPage() {
     formData.append("file", file);
 
     try {
-      // ตรวจสอบว่ามีฟังก์ชัน uploadImage ใน adminProductsApi หรือไม่
       let result;
       if (adminProductsApi.uploadImage) {
         result = await adminProductsApi.uploadImage(formData);
       } else {
-        // หากไม่มี API Helper ให้แนบ Authorization Token ด้วยตัวเองผ่าน fetch
-        const token = localStorage.getItem("token") || localStorage.getItem("accessToken");
+        const token = localStorage.getItem("pk_token") || localStorage.getItem("token") || localStorage.getItem("accessToken");
         const headers = {};
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
@@ -168,19 +172,43 @@ export default function AdminProductsPage() {
         result = await response.json();
       }
 
-      const uploadedUrl = result?.data || result?.url || result;
+      // รองรับ response หลากหลายรูปแบบ เช่น result.data.url, result.secure_url, result.url, result.data
+      let uploadedUrl = null;
+      if (typeof result === "string") {
+        uploadedUrl = result;
+      } else if (result) {
+        uploadedUrl =
+          result.secure_url ||
+          result.url ||
+          result.imageUrl ||
+          result.data?.secure_url ||
+          result.data?.url ||
+          result.data?.imageUrl ||
+          (typeof result.data === "string" ? result.data : null);
+      }
 
-      if (uploadedUrl && typeof uploadedUrl === "string") {
+      // ตรวจสอบว่าไม่ใช่ URL ผิดพลาด เช่น "https://cloudinary.com" โดดๆ ที่ไม่มี path รูปภาพ
+      if (
+        uploadedUrl &&
+        typeof uploadedUrl === "string" &&
+        uploadedUrl !== "https://cloudinary.com" &&
+        uploadedUrl !== "http://cloudinary.com" &&
+        uploadedUrl !== "https://cloudinary.com/"
+      ) {
         setImageUrl(uploadedUrl);
         alert("อัปโหลดรูปภาพสำเร็จ!");
       } else {
-        alert("อัปโหลดไม่สำเร็จ: " + (result?.message || "เกิดข้อผิดพลาดในการรับข้อมูลรูปภาพ"));
+        alert(
+          "อัปโหลดไม่สำเร็จ หรือเซิร์ฟเวอร์ส่ง URL รูปภาพไม่ถูกต้อง: " +
+            (result?.message || JSON.stringify(result || ""))
+        );
       }
     } catch (error) {
       console.error("Upload error:", error);
       alert(error.message || "เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
     } finally {
       setIsUploading(false);
+      e.target.value = "";
     }
   };
 
@@ -204,6 +232,22 @@ export default function AdminProductsPage() {
                   setPage(0);
                 }}
             />
+            <select
+                className="w-full md:w-auto rounded-xl border border-line bg-white px-3 py-2 text-sm"
+                value={filterCategoryId}
+                onChange={(e) => {
+                  setFilterCategoryId(e.target.value);
+                  setPage(0);
+                }}
+                aria-label="กรองตามหมวดหมู่"
+            >
+              <option value="">ทุกหมวดหมู่</option>
+              {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+              ))}
+            </select>
             <button
                 className="w-full md:w-auto rounded-xl bg-ink px-4 py-2 text-sm font-medium text-white hover:opacity-95"
                 onClick={openCreate}
@@ -212,6 +256,12 @@ export default function AdminProductsPage() {
             </button>
           </div>
         </div>
+
+        {filterCategoryId ? (
+            <div className="text-xs text-muted">
+              กำลังแสดงสินค้าในหมวดหมู่: {categories.find((category) => String(category.id) === filterCategoryId)?.name || "-"}
+            </div>
+        ) : null}
 
         <Card className="p-0 md:p-5 overflow-hidden">
           {productsQ.isLoading ? (

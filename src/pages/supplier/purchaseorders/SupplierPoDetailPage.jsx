@@ -107,7 +107,7 @@ export default function SupplierPoDetailPage() {
             </div>
 
             <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full min-w-[700px] text-sm">
                 <thead className="text-xs text-muted">
                   <tr className="border-b border-line">
                     <th className="py-3 text-left font-medium">สินค้า</th>
@@ -169,7 +169,7 @@ export default function SupplierPoDetailPage() {
             </div>
 
             <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full min-w-[700px] text-sm">
                 <thead className="text-xs text-muted">
                   <tr className="border-b border-line">
                     <th className="py-3 text-left font-medium">สินค้า</th>
@@ -264,7 +264,7 @@ export default function SupplierPoDetailPage() {
                   โหลดใบเสนอราคาไม่สำเร็จ
                 </div>
               ) : (
-                <table className="w-full text-sm">
+                <table className="w-full min-w-[700px] text-sm">
                   <thead className="text-xs text-muted">
                     <tr className="border-b border-line">
                       <th className="py-3 text-left font-medium">

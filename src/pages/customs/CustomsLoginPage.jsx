@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authApi } from "../../api/auth";
 import { authStorage } from "../../utils/authStorage";
+import { FileCheck2, LockKeyhole, ShieldCheck } from "lucide-react";
 
 export default function CustomsLoginPage() {
   const nav = useNavigate();
@@ -45,14 +46,31 @@ export default function CustomsLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-stone-950 to-stone-800 flex items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white/10 backdrop-blur border border-white/15 shadow-soft">
-        <div className="p-6 border-b border-white/10">
-          <div className="text-white text-lg font-semibold">ระบบศุลกากร (Customs)</div>
-          <div className="text-white/70 text-xs">ลงชื่อเข้าใช้เพื่อพิจารณาเอกสารนำเข้า</div>
-        </div>
+    <div className="flex min-h-screen items-center justify-center bg-ink px-4 py-6 sm:px-6 lg:px-10">
+      <div className="relative w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.06] shadow-lift backdrop-blur-xl">
+        <div className="absolute right-0 top-0 h-72 w-72 rounded-full border-[34px] border-brand/20" />
+        <div className="relative grid lg:grid-cols-[1fr_0.9fr]">
+          <div className="hidden p-10 lg:flex lg:flex-col lg:justify-between">
+            <div>
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-ink shadow-[0_10px_25px_rgba(15,118,110,0.3)]">
+                <FileCheck2 size={27} />
+              </div>
+              <div className="mt-14 max-w-sm text-4xl font-extrabold leading-tight tracking-tight text-white">ตรวจสอบเอกสารนำเข้าอย่างมั่นใจ</div>
+              <div className="mt-5 max-w-sm text-sm leading-7 text-white/60">ศูนย์ปฏิบัติงานสำหรับเจ้าหน้าที่ศุลกากร ตรวจสอบข้อมูล อนุมัติ และติดตามเอกสารได้ในที่เดียว</div>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-white/55"><ShieldCheck size={16} className="text-brand" /> ระบบเฉพาะเจ้าหน้าที่ศุลกากร</div>
+          </div>
 
-        <form className="p-6 space-y-4" onSubmit={onSubmit}>
+          <div className="bg-white p-6 sm:p-9 lg:my-5 lg:mr-5 lg:rounded-[1.5rem]">
+          <div className="mb-7 flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-ink lg:hidden"><FileCheck2 size={22} /></div>
+            <div>
+              <div className="text-2xl font-extrabold tracking-tight text-ink">เข้าสู่ระบบศุลกากร</div>
+              <div className="mt-1 text-xs text-muted">ลงชื่อเข้าใช้เพื่อพิจารณาเอกสารนำเข้า</div>
+            </div>
+          </div>
+
+        <form className="space-y-5" onSubmit={onSubmit}>
           {err ? (
             <div className="rounded-xl border border-rose-200/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">
               {err}
@@ -60,9 +78,9 @@ export default function CustomsLoginPage() {
           ) : null}
 
           <div>
-            <label className="text-xs text-white/70">อีเมล</label>
+            <label className="text-xs font-semibold text-ink">อีเมล</label>
             <input
-              className="mt-1 w-full rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-white/20"
+              className="mt-2 w-full rounded-2xl border border-line bg-paper px-4 py-3 text-sm text-ink outline-none focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/10"
               placeholder="customs@pkshop.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -70,10 +88,10 @@ export default function CustomsLoginPage() {
           </div>
 
           <div>
-            <label className="text-xs text-white/70">รหัสผ่าน</label>
+            <label className="text-xs font-semibold text-ink">รหัสผ่าน</label>
             <input
               type="password"
-              className="mt-1 w-full rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-white/20"
+              className="mt-2 w-full rounded-2xl border border-line bg-paper px-4 py-3 text-sm text-ink outline-none focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/10"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -83,16 +101,18 @@ export default function CustomsLoginPage() {
           <button
             disabled={loading}
             className={`w-full rounded-xl px-3 py-2 text-sm font-medium ${
-              loading ? "bg-white/20 text-white/60" : "bg-white text-stone-900 hover:opacity-95"
+              loading ? "cursor-not-allowed bg-stone-200 text-stone-500" : "bg-brand text-white shadow-sm hover:bg-brand-dark"
             }`}
           >
             {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบศุลกากร"}
           </button>
 
-          <div className="text-xs text-white/60 text-center">
-            เฉพาะเจ้าหน้าที่ศุลกากรเท่านั้น
+          <div className="flex items-center justify-center gap-2 text-center text-xs text-muted">
+            <LockKeyhole size={14} /> เฉพาะเจ้าหน้าที่ศุลกากรเท่านั้น
           </div>
         </form>
+        </div>
+        </div>
       </div>
     </div>
   );

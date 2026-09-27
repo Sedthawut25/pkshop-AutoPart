@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
-import { FileText, RotateCcw } from "lucide-react";
+import { FileText, Menu, RotateCcw, X } from "lucide-react";
 
 export default function SupplierLayout() {
   const [open, setOpen] = useState(false);
@@ -15,19 +15,23 @@ export default function SupplierLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-paper">
       {/* ✅ Mobile Topbar */}
-      <header className="sticky top-0 z-30 border-b border-line bg-white md:hidden">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div>
-            <div className="text-sm font-semibold">PKSHOP</div>
-            <div className="text-xs text-muted">ซัพพลายเออร์</div>
+      <header className="sticky top-0 z-30 border-b border-line/80 bg-white/90 shadow-sm backdrop-blur-md md:hidden">
+        <div className="flex items-center justify-between px-4 py-3.5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-sm font-bold text-ink">PK</div>
+            <div>
+              <div className="text-sm font-extrabold tracking-tight">PKSHOP</div>
+              <div className="text-xs text-muted">ซัพพลายเออร์</div>
+            </div>
           </div>
           <button
-            className="rounded-xl border border-line bg-white px-3 py-1.5 text-sm"
+            aria-label="เปิดเมนูซัพพลายเออร์"
+            className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-white text-muted hover:border-brand/40 hover:bg-brand-soft hover:text-brand"
             onClick={() => setOpen(true)}
           >
-            เมนู
+            <Menu size={19} />
           </button>
         </div>
       </header>
@@ -44,15 +48,15 @@ export default function SupplierLayout() {
         {/* ✅ Sidebar */}
         <aside
           className={[
-            "fixed inset-y-0 left-0 z-40 w-72 border-r border-line bg-white md:static md:z-auto md:block md:w-64",
+            "fixed inset-y-0 left-0 z-40 w-[min(19rem,calc(100vw-2rem))] border-r border-line/80 bg-white shadow-lift md:static md:z-auto md:block md:w-72 md:shadow-none",
             open ? "block" : "hidden md:block",
           ].join(" ")}
         >
           <div className="flex h-full flex-col">
             {/* Brand */}
-            <div className="flex items-center justify-between border-b border-line p-4">
+            <div className="flex items-center justify-between border-b border-line/70 p-5">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-ink text-white flex items-center justify-center font-bold">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand font-bold text-ink shadow-[0_8px_18px_rgba(15,118,110,0.2)]">
                   PK
                 </div>
                 <div>
@@ -62,10 +66,11 @@ export default function SupplierLayout() {
               </div>
 
               <button
-                className="rounded-xl border border-line px-3 py-1.5 text-sm md:hidden"
+                aria-label="ปิดเมนูซัพพลายเออร์"
+                className="grid h-9 w-9 place-items-center rounded-xl border border-line text-muted hover:bg-brand-soft hover:text-brand md:hidden"
                 onClick={() => setOpen(false)}
               >
-                ปิด
+                <X size={17} />
               </button>
             </div>
 
@@ -102,8 +107,8 @@ export default function SupplierLayout() {
         {/* ✅ Content */}
         <main className="flex-1">
           {/* Desktop header (เหมือน admin/customs มีหัวข้างบน) */}
-          <div className="hidden border-b border-line bg-white md:block">
-            <div className="flex items-center justify-between px-6 py-4">
+          <div className="hidden border-b border-line/80 bg-white/85 shadow-sm md:block">
+            <div className="flex items-center justify-between border-l-2 border-brand px-6 py-5">
               <div>
                 <div className="text-lg font-semibold">ซัพพลายเออร์</div>
                 <div className="text-xs text-muted">
@@ -114,7 +119,7 @@ export default function SupplierLayout() {
           </div>
 
           {/* Page container */}
-          <div className="p-4 md:p-6">
+          <div className="mx-auto w-full max-w-[92rem] p-4 sm:p-5 md:p-7">
             <Outlet />
           </div>
         </main>
@@ -130,8 +135,8 @@ function SideLink({ to, label, icon: Icon, onClick }) {
       onClick={onClick}
       className={({ isActive }) =>
         [
-          "flex items-center gap-2 rounded-xl px-3 py-2 text-sm",
-          isActive ? "bg-stone-100 font-semibold" : "hover:bg-stone-50",
+          "flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all",
+          isActive ? "bg-brand-soft text-brand-dark shadow-sm" : "text-muted hover:bg-paper hover:text-ink",
         ].join(" ")
       }
     >

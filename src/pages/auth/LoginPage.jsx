@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../../api/auth";
 import { authStorage } from "../../utils/authStorage";
+import { ArrowRight, LockKeyhole, ShieldCheck } from "lucide-react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -71,21 +72,45 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-paper flex items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-xl2 border border-line bg-white shadow-soft">
-        <div className="p-6 border-b border-line">
+    <div className="flex min-h-screen items-center justify-center bg-paper px-4 py-6 sm:px-6 lg:px-10">
+      <div className="grid w-full max-w-5xl overflow-hidden rounded-[2rem] border border-line/80 bg-white shadow-lift lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="relative hidden overflow-hidden bg-ink p-10 text-white lg:flex lg:flex-col lg:justify-between">
+          <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full border-[34px] border-brand/30" />
+          <div className="absolute -bottom-24 -left-20 h-64 w-64 rounded-full border-[28px] border-coral/20" />
+          <div className="relative">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-lg font-extrabold text-ink">PK</div>
+              <div>
+                <div className="text-lg font-extrabold tracking-tight">PKSHOP</div>
+                <div className="text-xs text-white/60">Auto parts platform</div>
+              </div>
+            </div>
+            <div className="mt-20 max-w-xs">
+              <div className="text-sm font-semibold text-brand-soft">ยินดีต้อนรับกลับ</div>
+              <div className="mt-3 text-4xl font-extrabold leading-tight tracking-tight">จัดการทุกคำสั่งซื้อ ให้ไหลลื่นในที่เดียว</div>
+              <div className="mt-5 text-sm leading-7 text-white/65">เข้าสู่ระบบเพื่อจัดการสินค้า สต็อก ออเดอร์ และการดำเนินงานของคุณ</div>
+            </div>
+          </div>
+          <div className="relative flex items-center gap-2 text-xs text-white/60">
+            <ShieldCheck size={16} className="text-brand-soft" />
+            ระบบจัดการที่ปลอดภัยสำหรับทีมของคุณ
+          </div>
+        </div>
+
+        <div>
+        <div className="border-b border-line p-6 sm:p-9">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-ink text-white flex items-center justify-center font-bold">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand text-lg font-extrabold text-ink lg:hidden">
               PK
             </div>
             <div>
-              <div className="text-lg font-semibold">PKSHOP</div>
-              <div className="text-xs text-muted">Sign in to your account</div>
+              <div className="text-2xl font-extrabold tracking-tight text-ink">เข้าสู่ระบบ</div>
+              <div className="mt-1 text-xs text-muted">ลงชื่อเข้าใช้บัญชี PKSHOP ของคุณ</div>
             </div>
           </div>
         </div>
 
-        <form className="p-6 space-y-4" onSubmit={onSubmit}>
+        <form className="space-y-5 p-6 sm:p-9" onSubmit={onSubmit}>
           {errorMsg ? (
             <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
               {errorMsg}
@@ -93,24 +118,24 @@ export default function LoginPage() {
           ) : null}
 
           <div>
-            <label className="text-xs text-muted">Email</label>
+            <label className="text-xs font-semibold text-ink">อีเมล</label>
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               type="email"
               placeholder="admin@pkshop.com"
-              className="mt-1 w-full rounded-xl border border-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-stone-200"
+              className="mt-2 w-full rounded-2xl border border-line bg-paper px-4 py-3 text-sm outline-none focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/10"
             />
           </div>
 
           <div>
-            <label className="text-xs text-muted">Password</label>
+            <label className="text-xs font-semibold text-ink">รหัสผ่าน</label>
             <input
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
               placeholder="••••••••"
-              className="mt-1 w-full rounded-xl border border-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-stone-200"
+              className="mt-2 w-full rounded-2xl border border-line bg-paper px-4 py-3 text-sm outline-none focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/10"
             />
           </div>
 
@@ -118,24 +143,27 @@ export default function LoginPage() {
             disabled={!canSubmit}
             className={`w-full rounded-xl px-3 py-2 text-sm font-medium ${
               canSubmit
-                ? "bg-ink text-white hover:opacity-95"
+                ? "bg-brand text-white shadow-sm hover:bg-brand-dark"
                 : "bg-stone-200 text-stone-500 cursor-not-allowed"
             }`}
           >
-            {loading ? "Signing in..." : "Sign in"}
+            {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
+            {!loading && <ArrowRight size={17} />}
           </button>
 
-          <div className="text-xs text-muted text-center">
+          <div className="flex items-center justify-center gap-2 text-center text-xs text-muted">
+            <LockKeyhole size={14} />
             สำหรับโปรเจกต์จบ PKSHOP • Admin / Customer / Supplier / Customs
           </div>
 
           <Link
             to="/supplier/register"
-            className="block w-full text-center text-sm font-semibold hover:underline"
+            className="block w-full text-center text-sm font-semibold text-brand-dark hover:text-brand hover:underline"
           >
             สมัครเป็นซัพพลายเออร์
           </Link>
         </form>
+        </div>
       </div>
     </div>
   );

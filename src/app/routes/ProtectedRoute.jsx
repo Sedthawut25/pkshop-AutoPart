@@ -4,10 +4,10 @@ import { Navigate, Outlet } from "react-router-dom";
 import { authStorage } from "../../utils/authStorage";
 import { hasRole } from "./roleGuard";
 
-export default function ProtectedRoute({ roles = [] }) {
+export default function ProtectedRoute({ roles = [], redirectTo = "/login" }) {
   const token = authStorage.token();
 
-  if (!token) return <Navigate to="/login" replace />;
+  if (!token) return <Navigate to={redirectTo} replace />;
 
   if (roles.length > 0 && !hasRole(roles)) {
     return <Navigate to="/403" replace />;

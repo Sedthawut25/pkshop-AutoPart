@@ -8,8 +8,8 @@ export default function AdminLayout() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-paper flex">
-      <div className="hidden lg:block w-64 shrink-0">
+    <div className="flex min-h-screen overflow-x-hidden bg-paper">
+      <div className="hidden w-72 shrink-0 lg:block">
         <Sidebar />
       </div>
 
@@ -22,7 +22,7 @@ export default function AdminLayout() {
           ></div>
 
           {/* ตัว Sidebar สไลด์จากซ้าย */}
-          <div className="relative flex w-64 max-w-xs flex-col bg-white shadow-xl transition-transform">
+          <div className="relative flex w-[min(16rem,calc(100vw-3rem))] max-w-full flex-col bg-white shadow-xl transition-transform">
             {/* ปุ่มกากบาทปิดเมนู */}
             <div className="absolute right-0 top-0 -mr-12 pt-4">
               <button
@@ -39,7 +39,7 @@ export default function AdminLayout() {
 
       <main className="flex-1 flex flex-col min-w-0">
         {/* 📱 Header สำหรับมือถือ (แสดงเฉพาะหน้าจอเล็ก เพื่อโชว์ปุ่ม Hamburger) */}
-        <div className="sticky top-0 z-40 flex items-center gap-x-4 bg-white px-4 py-3 border-b border-line shadow-sm sm:px-6 lg:hidden">
+        <div className="sticky top-0 z-40 flex items-center gap-x-3 border-b border-line bg-white px-4 py-3 shadow-sm sm:px-6 lg:hidden">
           <button
             type="button"
             className="-m-2.5 p-2.5 text-stone-700 hover:text-ink focus:outline-none"
@@ -48,14 +48,14 @@ export default function AdminLayout() {
             <span className="sr-only">เปิดเมนู</span>
             <Menu className="h-6 w-6" />
           </button>
-          <div className="flex-1 text-sm font-bold text-ink">
-            PKSHOP Admin
+            <div className="min-w-0 flex-1 truncate text-sm font-bold tracking-tight text-ink">
+            PKSHOP <span className="text-brand">Admin</span>
           </div>
         </div>
 
         <Topbar />
         
-        <div className="mx-auto w-full max-w-7xl p-4 md:p-6 lg:p-8">
+        <div className="mx-auto w-full max-w-[92rem] min-w-0 p-4 sm:p-5 md:p-7 lg:p-9">
           <Outlet />
         </div>
       </main>

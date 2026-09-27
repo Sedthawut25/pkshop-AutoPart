@@ -1,11 +1,71 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   color-scheme: light;
+  font-family: "Plus Jakarta Sans", "Noto Sans Thai", "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: #f6f8f7;
 }
 
 body {
-  @apply bg-paper text-ink;
+  @apply min-w-80 bg-paper text-ink antialiased;
+  margin: 0;
+  background-image:
+    radial-gradient(circle at 12% 0%, rgba(15, 118, 110, 0.07), transparent 27rem),
+    radial-gradient(circle at 88% 12%, rgba(231, 111, 81, 0.05), transparent 24rem);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a,
+select,
+input,
+textarea {
+  transition-duration: 180ms;
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+}
+
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(15, 118, 110, 0.22);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: #bfe7e0;
+  color: #17211f;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: #b9c9c5;
+  background-clip: padding-box;
 }

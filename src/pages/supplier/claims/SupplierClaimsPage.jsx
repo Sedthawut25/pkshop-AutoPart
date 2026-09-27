@@ -138,7 +138,7 @@ export default function SupplierClaimsPage() {
         <Metric label="เสร็จสิ้น" value={counts.COMPLETED || 0} />
       </div>
 
-      <Card className="p-5">
+      <Card className="p-4 sm:p-5">
         {listQuery.isLoading ? (
           <div className="text-sm text-muted">กำลังโหลด...</div>
         ) : listQuery.isError ? (
@@ -147,7 +147,7 @@ export default function SupplierClaimsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[980px] text-sm">
               <thead className="text-xs text-muted">
                 <tr className="border-b border-line">
                   <th className="py-3 text-left font-medium">เลขเคลม</th>

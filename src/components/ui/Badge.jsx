@@ -10,7 +10,7 @@ export default function Badge({ tone = "gray", children }) {
     blue: "bg-sky-50 text-sky-700 border-sky-200",
   };
   return (
-    <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-xs", map[tone])}>
+    <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium", map[tone])}>
       {children}
     </span>
   );

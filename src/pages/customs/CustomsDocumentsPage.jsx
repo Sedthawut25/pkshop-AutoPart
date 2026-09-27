@@ -36,14 +36,14 @@ export default function CustomsDocumentsPage() {
         </select>
       </div>
 
-      <Card className="p-5">
+      <Card className="p-4 sm:p-5">
         {q.isLoading ? (
           <div className="text-sm text-muted">กำลังโหลด...</div>
         ) : q.isError ? (
           <div className="text-sm text-rose-700">โหลดเอกสารไม่สำเร็จ</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[680px] text-sm">
               <thead className="text-xs text-muted">
                 <tr className="border-b border-line">
                   <th className="py-3 text-left font-medium">เลขที่เอกสาร</th>

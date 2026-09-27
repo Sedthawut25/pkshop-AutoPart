@@ -84,7 +84,7 @@ export default function CustomerHistoryPage() {
         }
         catch (err) {
             console.error(err);
-            alert("เกิดข้อผิดพลาดในการส่งรีวิว");
+            alert("คุณเคยรีวิวสินค้าชิ้นนี้แล้ว");
         }
     }
 

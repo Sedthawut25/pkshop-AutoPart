@@ -19,6 +19,7 @@ function Shell() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [user, setUser] = useState({ fullName: "ลูกค้า", email: ""});
+  const isAuthenticated = Boolean(authStorage.token());
 
   const dropdownRef = useRef(null);
 
@@ -60,14 +61,14 @@ function Shell() {
     } catch (error) {
       console.error("Clerk logout error:", error);
     } finally {
-      // 3. บังคับเปลี่ยนหน้าไปที่ Login เสมอ (ทำใน finally เพื่อให้รันชัวร์ 100%)
-      window.location.href = "/customer/login";
+      // กลับไปหน้า storefront เพื่อให้เลือกดูสินค้าได้โดยไม่ต้องล็อกอิน
+      window.location.href = "/customer";
     }
   }
 
   return (
-    <div className="min-h-screen bg-stone-50/50">
-      <header className="sticky top-0 z-40 border-b border-stone-200 bg-white/90 backdrop-blur-md">
+    <div className="min-h-screen bg-paper">
+      <header className="sticky top-0 z-40 border-b border-line/80 bg-white/90 shadow-[0_8px_25px_rgba(23,33,31,0.04)] backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5">
           
           <div className="flex items-center gap-4 lg:gap-6">
@@ -89,7 +90,7 @@ function Shell() {
               className="cursor-pointer select-none text-xl font-extrabold tracking-tight text-stone-900"
               onClick={() => nav("/customer", { replace: false })}
             >
-              PKSHOP
+              PK<span className="text-brand">SHOP</span>
             </div>
 
             {/* 🟢 เมนู Desktop (ซ่อนในมือถือ, แสดงใน md ขึ้นไป) */}
@@ -116,7 +117,7 @@ function Shell() {
                     if (e.key === "Enter") nav(`/customer/shop?q=${encodeURIComponent(q)}`);
                   }}
                   placeholder="ค้นหาสินค้า..."
-                  className="w-48 lg:w-56 xl:w-64 rounded-full border border-stone-200 bg-stone-50 px-4 py-1.5 text-xs outline-none focus:border-stone-400 focus:bg-white transition"
+                  className="w-48 rounded-full border border-line bg-paper px-4 py-2 text-xs outline-none focus:border-brand focus:bg-white lg:w-56 xl:w-64"
                 />
                 <button
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-xs"
@@ -127,10 +128,19 @@ function Shell() {
               </div>
             </div>
 
-            <CartButton />
+            {isAuthenticated ? (
+              <CartButton />
+            ) : (
+              <button
+                onClick={() => nav("/customer/login")}
+                className="rounded-full border border-line bg-white px-4 py-2 text-xs font-semibold text-ink shadow-sm hover:border-brand/40 hover:bg-brand-soft"
+              >
+                เข้าสู่ระบบ
+              </button>
+            )}
 
             {/* ProfileDropdown */}
-            <div className="relative hidden sm:block" ref={dropdownRef}>
+            {isAuthenticated ? <div className="relative hidden sm:block" ref={dropdownRef}>
                   <button
                     onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                     className="flex items-center gap-2 rounded-full border border-stone-200 p-1 pr-3 text-sm font-medium text-stone-700 hover:bg-stone-50 transition focus:outline-none shadow-sm"
@@ -169,7 +179,7 @@ function Shell() {
                       </button>
                     </div>
                   )}
-            </div>
+            </div> : null}
           </div>
         </div>
 
@@ -181,7 +191,7 @@ function Shell() {
         >
           <div className="flex flex-col gap-1 px-4 py-3 bg-white shadow-inner">
             {/* โปรไฟล์ย่อสำหรับมือถือ */}
-            <div className="flex items-center gap-3 mb-3 pb-3 border-b border-stone-100">
+            {isAuthenticated ? <div className="flex items-center gap-3 mb-3 pb-3 border-b border-stone-100">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-900 text-sm font-bold text-white uppercase">
                   {user.fullName ? user.fullName.charAt(0) : "U"}
                 </div>
@@ -194,7 +204,7 @@ function Shell() {
                     จัดการบัญชีของฉัน
                   </button>
                 </div>
-            </div>
+            </div> : null}
 
             <div className="relative mb-2">
               <input
@@ -218,17 +228,26 @@ function Shell() {
             <MobileLink to="/customer/history" label="ประวัติสั่งซื้อ" onClick={() => setIsMobileMenuOpen(false)} />
             <MobileLink to="/customer/claims" label="คืน/เคลมสินค้า" onClick={() => setIsMobileMenuOpen(false)} />
             
-            <button
-              className="mt-2 w-full rounded-xl bg-stone-100 px-3 py-2 text-sm font-semibold text-stone-600 hover:bg-stone-200 text-left"
-              onClick={logout}
-            >
-              ออกจากระบบ
-            </button>
+            {isAuthenticated ? (
+              <button
+                className="mt-2 w-full rounded-xl bg-stone-100 px-3 py-2 text-sm font-semibold text-stone-600 hover:bg-stone-200 text-left"
+                onClick={logout}
+              >
+                ออกจากระบบ
+              </button>
+            ) : (
+              <button
+                className="mt-2 w-full rounded-xl border border-line bg-white px-3 py-2 text-left text-sm font-semibold text-ink hover:border-brand/40 hover:bg-brand-soft"
+                onClick={() => nav("/customer/login")}
+              >
+                เข้าสู่ระบบเพื่อสั่งซื้อ
+              </button>
+            )}
           </div>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-6">
+      <main className="mx-auto w-full max-w-[92rem] px-4 py-7 sm:px-6 sm:py-9">
         <Outlet />
       </main>
     </div>
@@ -240,6 +259,7 @@ function TopLink({ to, label }) {
   return (
     <NavLink
       to={to}
+      end={to === "/customer"}
       className={({ isActive }) =>
         `rounded-full px-2.5 py-1.5 text-xs lg:text-sm font-medium transition-all ${
           isActive ? "bg-stone-900 text-white font-semibold shadow-sm" : "text-stone-600 hover:bg-stone-100"
