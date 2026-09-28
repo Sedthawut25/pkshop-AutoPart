@@ -60,8 +60,52 @@ export default function AdminAccountingPage () {
                         <div className="text-xs text-muted">แสดง 20 รายการล่าสุด</div>
                     </div>
                 </div>
-                <div className="overflow-auto">
-                    <table className="w-full text-sm text-left">
+                {/* 📱 Mobile Transaction Cards */}
+                <div className="md:hidden divide-y divide-line">
+                    {txns.map((txn) => {
+                        const isRefund = txn.type === "payment_refund";
+                        return (
+                            <div key={txn.id} className="py-3 space-y-2">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <div className="font-mono text-xs text-muted break-all">{txn.id}</div>
+                                        <div className="text-[11px] text-stone-400 mt-0.5">{formatDateTime(txn.createdTimestamp)}</div>
+                                    </div>
+                                    <Badge tone={isRefund ? "red" : "green"}>
+                                        {isRefund ? "คืนเงิน" : "รับชำระ"}
+                                    </Badge>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2 bg-stone-50 p-2.5 rounded-xl border border-stone-100 text-xs">
+                                    <div>
+                                        <span className="text-muted block text-[10px]">ยอดรับ</span>
+                                        <span className={`font-semibold ${isRefund ? "text-rose-600" : "text-ink"}`}>
+                                            ฿{txn.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span className="text-muted block text-[10px]">ค่าธรรมเนียม</span>
+                                        <span className="text-rose-500 font-medium">
+                                            {txn.fee === 0 ? "-" : `฿${txn.fee.toLocaleString(undefined, {minimumFractionDigits: 2})}`}
+                                        </span>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="text-muted block text-[10px]">ยอดสุทธิ</span>
+                                        <span className={`font-bold ${isRefund ? "text-rose-600" : "text-green-600"}`}>
+                                            ฿{txn.net.toLocaleString(undefined, {minimumFractionDigits: 2})}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                    {txns.length === 0 && (
+                        <div className="py-8 text-center text-sm text-muted">ยังไม่มีรายการธุรกรรม</div>
+                    )}
+                </div>
+
+                {/* 💻 Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full min-w-[700px] text-sm text-left">
                         <thead className="text-xs text-muted bg-stone-50">
                             <tr className="border-y border-line">
                                 <th className="py-3 px-4 font-medium">วันที่ / เวลา </th>
@@ -77,10 +121,10 @@ export default function AdminAccountingPage () {
                                 const isRefund= txn.type === "payment_refund";
 
                                 return (
-                                    <tr key={txn.id} className="border-b border-line hover:bg-stone-50" >
-                                        <td className="py-3 py-4 whitespace-nowrap">{formatDateTime(txn.createdTimestamp)}</td>
-                                        <td className="py-3 py-4 font-mono text-xs text-muted">{txn.id}</td>
-                                        <td className="py-3 py-4">
+                                    <tr key={txn.id} className="border-b border-line hover:bg-stone-50/50" >
+                                        <td className="py-3 px-4 whitespace-nowrap">{formatDateTime(txn.createdTimestamp)}</td>
+                                        <td className="py-3 px-4 font-mono text-xs text-muted">{txn.id}</td>
+                                        <td className="py-3 px-4">
                                             <Badge tone={isRefund ? "red" : "green"}>
                                                 {isRefund ? "คืนเงิน (Refund)" : "รับชำระ"}
                                             </Badge>

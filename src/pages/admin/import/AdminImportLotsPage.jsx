@@ -54,46 +54,83 @@ export default function AdminImportLotsPage() {
         ) : q.isError ? (
           <div className="text-sm text-rose-700">โหลดรายการนำเข้าไม่สำเร็จ</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-xs text-muted">
-                <tr className="border-b border-line">
-                  <th className="py-3 text-left font-medium">Lot No.</th>
-                  <th className="py-3 text-left font-medium">PO</th>
-                  <th className="py-3 text-left font-medium">สถานะ</th>
-                  <th className="py-3 text-right font-medium">ต้นทุนรวม</th>
-                  <th className="py-3 text-right font-medium">จัดการ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lots.map((lot) => (
-                  <tr key={lot.id} className="border-b border-line">
-                    <td className="py-3">{lot.lotNumber || `LOT-${lot.id}`}</td>
-                    <td className="py-3">{lot.purchaseOrder?.poNumber || `PO-${lot.purchaseOrder?.id || "-"}`}</td>
-                    <td className="py-3">
-                      <StatusBadge status={lot.status} />
-                    </td>
-                    <td className="py-3 text-right">{lot.totalImportCost ?? "-"}</td>
-                    <td className="py-3 text-right">
-                      <Link
-                        to={`/admin/import/lots/${lot.id}`}
-                        className="rounded-xl border border-line bg-white px-3 py-1.5 text-sm hover:bg-stone-50"
-                      >
-                        ดูรายละเอียด
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+          <div>
+            {/* 📱 Mobile Card View */}
+            <div className="md:hidden divide-y divide-line">
+              {lots.map((lot) => (
+                <div key={lot.id} className="p-4 space-y-3 bg-white">
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <div className="font-bold text-sm text-ink">{lot.lotNumber || `LOT-${lot.id}`}</div>
+                      <div className="text-xs text-muted mt-0.5">PO: {lot.purchaseOrder?.poNumber || `PO-${lot.purchaseOrder?.id || "-"}`}</div>
+                    </div>
+                    <StatusBadge status={lot.status} />
+                  </div>
 
-                {lots.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="py-6 text-center text-sm text-muted">
-                      ไม่พบรายการนำเข้า
-                    </td>
+                  <div className="flex items-center justify-between text-xs bg-stone-50 p-2.5 rounded-xl border border-stone-100">
+                    <span className="text-muted">ต้นทุนรวม:</span>
+                    <span className="font-bold text-ink">฿ {Number(lot.totalImportCost || 0).toLocaleString()}</span>
+                  </div>
+
+                  <div className="pt-1 flex justify-end">
+                    <Link
+                      to={`/admin/import/lots/${lot.id}`}
+                      className="rounded-xl border border-line bg-white px-3 py-1.5 text-xs font-medium hover:bg-stone-50"
+                    >
+                      ดูรายละเอียด →
+                    </Link>
+                  </div>
+                </div>
+              ))}
+              {lots.length === 0 && (
+                <div className="py-8 text-center text-sm text-muted">ไม่พบรายการนำเข้า</div>
+              )}
+            </div>
+
+            {/* 💻 Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full min-w-[650px] text-sm">
+                <thead className="text-xs text-muted">
+                  <tr className="border-b border-line">
+                    <th className="py-3 px-3 text-left font-medium">Lot No.</th>
+                    <th className="py-3 px-3 text-left font-medium">PO</th>
+                    <th className="py-3 px-3 text-left font-medium">สถานะ</th>
+                    <th className="py-3 px-3 text-right font-medium">ต้นทุนรวม</th>
+                    <th className="py-3 px-3 text-right font-medium">จัดการ</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {lots.map((lot) => (
+                    <tr key={lot.id} className="border-b border-line hover:bg-stone-50/50">
+                      <td className="py-3 px-3 font-medium">{lot.lotNumber || `LOT-${lot.id}`}</td>
+                      <td className="py-3 px-3">{lot.purchaseOrder?.poNumber || `PO-${lot.purchaseOrder?.id || "-"}`}</td>
+                      <td className="py-3 px-3">
+                        <StatusBadge status={lot.status} />
+                      </td>
+                      <td className="py-3 px-3 text-right font-semibold">
+                        {lot.totalImportCost ? `฿ ${Number(lot.totalImportCost).toLocaleString()}` : "-"}
+                      </td>
+                      <td className="py-3 px-3 text-right">
+                        <Link
+                          to={`/admin/import/lots/${lot.id}`}
+                          className="rounded-xl border border-line bg-white px-3 py-1.5 text-sm hover:bg-stone-50 transition"
+                        >
+                          ดูรายละเอียด
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {lots.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="py-6 text-center text-sm text-muted">
+                        ไม่พบรายการนำเข้า
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </Card>

@@ -18,6 +18,7 @@ export default function CustomerShopPage() {
 
   const [page, setPage] = useState(0);
   const size = 12;
+  const [showMobileFilter, setShowMobileFilter] = useState(false);
 
    const filtersQ = useQuery({
     queryKey: ["shop-filters"],
@@ -54,10 +55,38 @@ export default function CustomerShopPage() {
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+      {/* 📱 Mobile Filter Button */}
+      <div className="flex items-center justify-between rounded-2xl border border-line bg-white p-3.5 lg:hidden">
+        <div className="text-sm font-semibold">ตัวกรองสินค้า</div>
+        <button
+          onClick={() => setShowMobileFilter(!showMobileFilter)}
+          className="rounded-xl border border-line bg-stone-50 px-3 py-1.5 text-xs font-medium hover:bg-stone-100"
+        >
+          {showMobileFilter ? "ซ่อนตัวกรอง ▲" : "แสดงตัวกรอง ▼"}
+        </button>
+      </div>
+
       {/* Left filters */}
-      <aside className="lg:col-span-3">
-        <div className="rounded-3xl border border-line bg-white p-5">
-          <div className="text-lg font-semibold">กรองสินค้า</div>
+      <aside className={`lg:col-span-3 ${showMobileFilter ? "block" : "hidden lg:block"}`}>
+        <div className="rounded-3xl border border-line bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="text-lg font-semibold">กรองสินค้า</div>
+            {(brandId || categoryId || modelId || minPrice || maxPrice) && (
+              <button
+                onClick={() => {
+                  setBrandId("");
+                  setCategoryId("");
+                  setModelId("");
+                  setMinPrice("");
+                  setMaxPrice("");
+                  setPage(0);
+                }}
+                className="text-xs text-rose-600 hover:underline"
+              >
+                ล้างทั้งหมด
+              </button>
+            )}
+          </div>
 
           <div className="mt-4 space-y-3">
             <div>

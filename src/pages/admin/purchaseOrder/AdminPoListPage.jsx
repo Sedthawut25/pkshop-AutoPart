@@ -72,63 +72,97 @@ export default function AdminPoListPage() {
             </span>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-xs text-muted">
-                <tr className="border-b border-line">
-                  <th className="py-3 text-left font-medium">
-                    หมายเลขใบสั่งซื้อ
-                  </th>
-                  <th className="py-3 text-left font-medium">ซัพพลายเออร์</th>
-                  <th className="py-3 text-left font-medium">สถานะ</th>
-                  <th className="py-3 text-right font-medium">รายการ</th>
-                  <th className="py-3 text-right font-medium">การดำเนินการ</th>
-                </tr>
-              </thead>
+          <div>
+            {/* 📱 Mobile Card View */}
+            <div className="md:hidden divide-y divide-line">
+              {rows.map((po) => {
+                const supplierName =
+                  po.supplierUser?.email ||
+                  po.supplierUser?.fullName ||
+                  po.supplierUser?.name ||
+                  "-";
 
-              <tbody>
-                {rows.map((po) => (
-                  <tr key={po.id} className="border-b border-line">
-                    <td className="py-3">{po.poNumber || `PO-${po.id}`}</td>
-
-                    <td className="py-3">
-                      {po.supplierUser?.email ||
-                        po.supplierUser?.fullName ||
-                        po.supplierUser?.name ||
-                        "-"}
-                    </td>
-
-                    <td className="py-3">
+                return (
+                  <div key={po.id} className="p-4 space-y-3 bg-white">
+                    <div className="flex justify-between items-start gap-2">
+                      <div>
+                        <div className="font-bold text-sm text-ink">{po.poNumber || `PO-${po.id}`}</div>
+                        <div className="text-xs text-muted mt-0.5">ซัพพลายเออร์: {supplierName}</div>
+                      </div>
                       <StatusBadge status={po.status} />
-                    </td>
+                    </div>
 
-                    <td className="py-3 text-right">
-                      {po.totalItems ?? po.itemsCount ?? "-"}
-                    </td>
+                    <div className="flex items-center justify-between text-xs bg-stone-50 p-2.5 rounded-xl border border-stone-100">
+                      <span className="text-muted">จำนวนรายการ:</span>
+                      <span className="font-bold text-ink">{po.totalItems ?? po.itemsCount ?? "-"} รายการ</span>
+                    </div>
 
-                    <td className="py-3 text-right">
+                    <div className="pt-1 flex justify-end">
                       <Link
                         to={`/admin/po/${po.id}`}
-                        className="inline-flex rounded-xl border border-line bg-white px-3 py-1.5 text-sm hover:bg-stone-50"
+                        className="rounded-xl border border-line bg-white px-3 py-1.5 text-xs font-medium hover:bg-stone-50"
                       >
-                        View
+                        ดูรายละเอียด →
                       </Link>
-                    </td>
-                  </tr>
-                ))}
+                    </div>
+                  </div>
+                );
+              })}
+              {rows.length === 0 && (
+                <div className="py-8 text-center text-sm text-muted">ไม่พบใบสั่งซื้อ</div>
+              )}
+            </div>
 
-                {rows.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="py-6 text-center text-sm text-muted"
-                    >
-                      ไม่พบใบสั่งซื้อ
-                    </td>
+            {/* 💻 Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full min-w-[700px] text-sm">
+                <thead className="text-xs text-muted">
+                  <tr className="border-b border-line">
+                    <th className="py-3 px-3 text-left font-medium">หมายเลขใบสั่งซื้อ</th>
+                    <th className="py-3 px-3 text-left font-medium">ซัพพลายเออร์</th>
+                    <th className="py-3 px-3 text-left font-medium">สถานะ</th>
+                    <th className="py-3 px-3 text-right font-medium">รายการ</th>
+                    <th className="py-3 px-3 text-right font-medium">การดำเนินการ</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+                  {rows.map((po) => (
+                    <tr key={po.id} className="border-b border-line hover:bg-stone-50/50">
+                      <td className="py-3 px-3 font-medium">{po.poNumber || `PO-${po.id}`}</td>
+                      <td className="py-3 px-3">
+                        {po.supplierUser?.email ||
+                          po.supplierUser?.fullName ||
+                          po.supplierUser?.name ||
+                          "-"}
+                      </td>
+                      <td className="py-3 px-3">
+                        <StatusBadge status={po.status} />
+                      </td>
+                      <td className="py-3 px-3 text-right">
+                        {po.totalItems ?? po.itemsCount ?? "-"}
+                      </td>
+                      <td className="py-3 px-3 text-right">
+                        <Link
+                          to={`/admin/po/${po.id}`}
+                          className="inline-flex rounded-xl border border-line bg-white px-3 py-1.5 text-sm hover:bg-stone-50 transition"
+                        >
+                          View
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {rows.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="py-6 text-center text-sm text-muted">
+                        ไม่พบใบสั่งซื้อ
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </Card>

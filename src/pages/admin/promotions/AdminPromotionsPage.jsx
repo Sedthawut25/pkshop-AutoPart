@@ -221,54 +221,97 @@ export default function AdminPromotionsPage() {
         ) : promosQ.isError ? (
           <div className="text-sm text-rose-700">โหลดโปรโมชันไม่สำเร็จ</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-xs text-muted">
-                <tr className="border-b border-line">
-                  <th className="py-3 text-left font-medium">โค้ด</th>
-                  <th className="py-3 text-left font-medium">ชื่อ</th>
-                  <th className="py-3 text-left font-medium">ประเภท</th>
-                  <th className="py-3 text-left font-medium">ใช้กับ</th>
-                  <th className="py-3 text-left font-medium">สถานะ</th>
-                  <th className="py-3 text-right font-medium">จัดการ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {promos.map((p) => (
-                  <tr key={p.id} className="border-b border-line">
-                    <td className="py-3">{p.code}</td>
-                    <td className="py-3">{p.name}</td>
-                    <td className="py-3">{p.promoType}</td>
-                    <td className="py-3">{p.appliesTo}</td>
-                    <td className="py-3">
-                      {p.active ? <Badge tone="green">เปิด</Badge> : <Badge tone="red">ปิด</Badge>}
-                    </td>
-                    <td className="py-3 text-right flex justify-end gap-2">
-                      <button
-                        className="rounded-xl border border-line px-3 py-1.5 text-sm hover:bg-stone-50"
-                        onClick={() => openEdit(p)}
-                      >
-                        แก้ไข/ตั้งค่า
-                      </button>
-                      <button
-                        className="rounded-xl border border-line px-3 py-1.5 text-sm hover:bg-stone-50"
-                        onClick={() => deleteMut.mutate(p.id)}
-                      >
-                        ลบ
-                      </button>
-                    </td>
+          <>
+            {/* 📱 Mobile Card View */}
+            <div className="md:hidden divide-y divide-line">
+              {promos.map((p) => (
+                <div key={p.id} className="py-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-bold text-sm text-ink font-mono">{p.code}</div>
+                      <div className="text-xs text-muted mt-0.5">{p.name}</div>
+                    </div>
+                    {p.active ? <Badge tone="green">เปิด</Badge> : <Badge tone="red">ปิด</Badge>}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs bg-stone-50 p-2.5 rounded-xl border border-stone-100">
+                    <div><span className="text-muted">ประเภท:</span> <span className="font-medium">{p.promoType}</span></div>
+                    <div><span className="text-muted">ใช้กับ:</span> <span className="font-medium">{p.appliesTo}</span></div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      className="flex-1 rounded-xl border border-line px-3 py-2 text-xs font-medium hover:bg-stone-50 transition"
+                      onClick={() => openEdit(p)}
+                    >
+                      แก้ไข/ตั้งค่า
+                    </button>
+                    <button
+                      className="flex-1 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-100 transition"
+                      onClick={() => deleteMut.mutate(p.id)}
+                    >
+                      ลบ
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {promos.length === 0 && (
+                <div className="py-8 text-center text-sm text-muted">ไม่พบโปรโมชัน</div>
+              )}
+            </div>
+
+            {/* 💻 Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full min-w-[600px] text-sm">
+                <thead className="text-xs text-muted">
+                  <tr className="border-b border-line">
+                    <th className="py-3 text-left font-medium">โค้ด</th>
+                    <th className="py-3 text-left font-medium">ชื่อ</th>
+                    <th className="py-3 text-left font-medium">ประเภท</th>
+                    <th className="py-3 text-left font-medium">ใช้กับ</th>
+                    <th className="py-3 text-left font-medium">สถานะ</th>
+                    <th className="py-3 text-right font-medium">จัดการ</th>
                   </tr>
-                ))}
-                {promos.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="py-6 text-center text-sm text-muted">
-                      ไม่พบโปรโมชัน
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {promos.map((p) => (
+                    <tr key={p.id} className="border-b border-line hover:bg-stone-50/50">
+                      <td className="py-3 font-mono font-medium">{p.code}</td>
+                      <td className="py-3">{p.name}</td>
+                      <td className="py-3">{p.promoType}</td>
+                      <td className="py-3">{p.appliesTo}</td>
+                      <td className="py-3">
+                        {p.active ? <Badge tone="green">เปิด</Badge> : <Badge tone="red">ปิด</Badge>}
+                      </td>
+                      <td className="py-3 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            className="rounded-xl border border-line px-3 py-1.5 text-sm hover:bg-stone-50 transition"
+                            onClick={() => openEdit(p)}
+                          >
+                            แก้ไข/ตั้งค่า
+                          </button>
+                          <button
+                            className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-sm text-rose-600 hover:bg-rose-100 transition"
+                            onClick={() => deleteMut.mutate(p.id)}
+                          >
+                            ลบ
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {promos.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="py-6 text-center text-sm text-muted">
+                        ไม่พบโปรโมชัน
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </Card>
 

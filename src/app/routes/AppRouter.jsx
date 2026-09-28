@@ -3,7 +3,6 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicOnlyRoute from "./PublicOnlyRoute";
-import { authStorage } from "../../utils/authStorage";
 
 import DashboardPage from "../../pages/admin/DashboardPage";
 import AdminLayout from "../../components/layouts/AdminLayout";
@@ -64,23 +63,12 @@ function Placeholder({ title }) {
   return <div className="p-6">{title}</div>;
 }
 
-function HomeRedirect() {
-  const token = authStorage.token();
-  const role = authStorage.role();
-
-  if (!token) return <Navigate to="/customer" replace />;
-  if (role === "ADMIN") return <Navigate to="/admin/dashboard" replace />;
-  if (role === "SUPPLIER") return <Navigate to="/supplier/po" replace />;
-  if (role === "CUSTOMS") return <Navigate to="/customs/documents" replace />;
-
-  return <Navigate to="/customer" replace />;
-}
-
 export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomeRedirect />} />
+        {/* 🟢 บังคับให้ทุกคนที่เข้าผ่าน Domain หลัก (/) วิ่งไปที่หน้าลูกค้า (/customer) ทันที */}
+        <Route path="/" element={<Navigate to="/customer" replace />} />
 
         <Route element={<PublicOnlyRoute />}>
           <Route path="/login" element={<LoginPage />} />
@@ -133,9 +121,9 @@ export default function AppRouter() {
             <Route path="/admin/supplier" element={<AdminSupplierPage />} />
             <Route path="/admin/reviews" element={<AdminReviewPage />} />
             <Route path="/admin/request" element={<AdminRequestPage />} />
-            <Route path="/admin/claims" element={<AdminClaimsPage/> }/>
+            <Route path="/admin/claims" element={<AdminClaimsPage />} />
             <Route path="/admin/supplier-claims" element={<AdminSupplierClaimsPage />} />
-            <Route path="/admin/accounting" element={<AdminAccountingPage/>}/>
+            <Route path="/admin/accounting" element={<AdminAccountingPage />} />
           </Route>
         </Route>
 
@@ -191,10 +179,10 @@ export default function AppRouter() {
               element={<CustomerOrderDetailPage />}
             />
             <Route path="history" element={<CustomerHistoryPage />} />
-            <Route path="/customer/history/:historyId" element={<CustomerHistoryDetailPage/>}/>
-            <Route path="requests" element={<CustomerRequestPage/>} />
-            <Route path="/customer/claims" element={<CustomerClaimsPage/>} />
-            <Route path="/customer/profile" element={<CustomerProfile/>} />
+            <Route path="/customer/history/:historyId" element={<CustomerHistoryDetailPage />} />
+            <Route path="requests" element={<CustomerRequestPage />} />
+            <Route path="/customer/claims" element={<CustomerClaimsPage />} />
+            <Route path="/customer/profile" element={<CustomerProfile />} />
           </Route>
         </Route>
         <Route path="/success" element={<PaymentSuccessPage />} />

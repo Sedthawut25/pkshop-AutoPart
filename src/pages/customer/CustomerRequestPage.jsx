@@ -147,7 +147,39 @@ export default function CustomerRequestPage() {
 
                 <div className="bg-white p-6 rounded-lg shadow-md lg:col-span-2">
                     <h2 className="text-xl font-semibold mb-4">ประวัติการส่งคำขออะไหล่</h2>
-                    <div className="overflow-x-auto">
+                    {/* 📱 Mobile History Cards */}
+                    <div className="md:hidden divide-y divide-stone-200">
+                        {requests.length > 0 ? (
+                            requests.map((req) => (
+                                <div key={req.id} className="py-3 space-y-2">
+                                    <div className="flex justify-between items-start gap-2">
+                                        <div>
+                                            <div className="font-semibold text-sm text-stone-900">{req.partName}</div>
+                                            <div className="text-xs text-stone-500 mt-0.5">{req.carBrand} {req.carModel}</div>
+                                        </div>
+                                        <span className={`px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full shrink-0
+                                            ${(req.status === 'PENDING' || req.status === 'OPEN') ? 'bg-yellow-100 text-yellow-800' :
+                                                (req.status === 'APPROVE' || req.status === 'APPROVED') ? 'bg-green-100 text-green-800' : 
+                                                req.status === 'REJECTED' ? 'bg-red-100 text-red-800' : 'bg-stone-100 text-stone-800'}`}>
+                                            {req.status === 'OPEN' ? 'กำลังดำเนินการ' : 
+                                             req.status === 'APPROVE' ? 'อนุมัติแล้ว' : 
+                                             req.status === 'REJECTED' ? 'ถูกปฏิเสธ' : req.status || 'รอดำเนินการ'}
+                                        </span>
+                                    </div>
+                                    <div className="text-[11px] text-stone-400">
+                                        วันที่ส่ง: {formatDate(req.createdAt)}
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="py-8 text-center text-sm text-stone-500">
+                                ไม่มีประวัติการขออะไหล่
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 💻 Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto">
                         <table className="min-w-full divide-y divide-stone-200">
                             <thead className="bg-stone-50">
                                 <tr>
@@ -161,7 +193,6 @@ export default function CustomerRequestPage() {
                                 {requests.length > 0 ? (
                                     requests.map((req) => (
                                         <tr key={req.id}>
-                                            {/* 🛠️ เปลี่ยนมาเรียกใช้ formatDate */}
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">
                                                 {formatDate(req.createdAt)}
                                             </td>
@@ -169,7 +200,6 @@ export default function CustomerRequestPage() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">
                                                 {req.carBrand} {req.carModel}
                                             </td>
-                                            {/* 🛠️ ปรับสถานะให้รองรับ OPEN และแสดงข้อความให้ลูกค้าเข้าใจง่าย */}
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                                                         ${(req.status === 'PENDING' || req.status === 'OPEN') ? 'bg-yellow-100 text-yellow-800' :

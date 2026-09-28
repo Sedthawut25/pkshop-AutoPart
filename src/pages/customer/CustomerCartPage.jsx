@@ -25,54 +25,102 @@ export default function CustomerCartPage() {
             ตะกร้าว่าง • <Link className="underline" to="/customer/shop">ไปเลือกสินค้า</Link>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-xs text-muted">
-                <tr className="border-b border-line">
-                  <th className="py-3 text-left font-medium">สินค้า</th>
-                  <th className="py-3 text-right font-medium">ราคา</th>
-                  <th className="py-3 text-right font-medium">จำนวน</th>
-                  <th className="py-3 text-right font-medium">รวม</th>
-                  <th className="py-3 text-right font-medium">จัดการ</th>
-                </tr>
-              </thead>
-              <tbody>
+          <>
+            <div>
+              {/* 📱 Mobile Item List */}
+              <div className="md:hidden divide-y divide-line">
                 {rows.map((it) => {
-                  // 🟢 ดักจับชื่อตัวแปรเผื่อใช้ของเก่า (name, price) หรือของใหม่จาก Backend (productName, unitPrice)
                   const currentName = it.productName || it.name || "ไม่มีชื่อสินค้า";
                   const currentPrice = Number(it.unitPrice || it.price || 0);
                   const line = currentPrice * Number(it.qty || 0);
 
                   return (
-                    <tr key={it.productId} className="border-b border-line">
-                      <td className="py-3">
-                        <div className="font-semibold">{currentName}</div>
-                        <div className="text-xs text-muted">#{it.productId}</div>
-                      </td>
-                      <td className="py-3 text-right">฿ {currentPrice.toLocaleString()}</td>
-                      <td className="py-3 text-right">
-                        <input
-                          type="number"
-                          min={1}
-                          className="w-24 rounded-xl border border-line px-2 py-1 text-right text-sm"
-                          value={it.qty}
-                          onChange={(e) => setQty(it.productId, e.target.value)}
-                        />
-                      </td>
-                      <td className="py-3 text-right">฿ {line.toLocaleString()}</td>
-                      <td className="py-3 text-right">
+                    <div key={it.productId} className="py-4 space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="font-semibold text-sm text-ink">{currentName}</div>
+                          <div className="text-xs text-muted">SKU/ID: #{it.productId}</div>
+                          <div className="text-xs font-medium text-stone-600 mt-1">฿ {currentPrice.toLocaleString()} / ชิ้น</div>
+                        </div>
                         <button
-                          className="rounded-xl border border-line px-3 py-1.5 text-sm hover:bg-stone-50"
+                          className="rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs text-rose-600 hover:bg-rose-100"
                           onClick={() => remove(it.productId)}
                         >
                           ลบ
                         </button>
-                      </td>
-                    </tr>
+                      </div>
+
+                      <div className="flex items-center justify-between bg-stone-50 p-2.5 rounded-xl border border-stone-100">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted">จำนวน:</span>
+                          <input
+                            type="number"
+                            min={1}
+                            className="w-16 rounded-lg border border-line bg-white px-2 py-1 text-center text-sm font-semibold"
+                            value={it.qty}
+                            onChange={(e) => setQty(it.productId, e.target.value)}
+                          />
+                        </div>
+                        <div className="text-right">
+                          <span className="text-xs text-muted block">รวม</span>
+                          <span className="text-sm font-bold text-ink">฿ {line.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
                   );
                 })}
-              </tbody>
-            </table>
+              </div>
+
+              {/* 💻 Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="text-xs text-muted">
+                    <tr className="border-b border-line">
+                      <th className="py-3 text-left font-medium">สินค้า</th>
+                      <th className="py-3 text-right font-medium">ราคา</th>
+                      <th className="py-3 text-right font-medium">จำนวน</th>
+                      <th className="py-3 text-right font-medium">รวม</th>
+                      <th className="py-3 text-right font-medium">จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((it) => {
+                      const currentName = it.productName || it.name || "ไม่มีชื่อสินค้า";
+                      const currentPrice = Number(it.unitPrice || it.price || 0);
+                      const line = currentPrice * Number(it.qty || 0);
+
+                      return (
+                        <tr key={it.productId} className="border-b border-line hover:bg-stone-50/50">
+                          <td className="py-3">
+                            <div className="font-semibold text-ink">{currentName}</div>
+                            <div className="text-xs text-muted">#{it.productId}</div>
+                          </td>
+                          <td className="py-3 text-right">฿ {currentPrice.toLocaleString()}</td>
+                          <td className="py-3 text-right">
+                            <input
+                              type="number"
+                              min={1}
+                              className="w-24 rounded-xl border border-line px-2 py-1 text-right text-sm"
+                              value={it.qty}
+                              onChange={(e) => setQty(it.productId, e.target.value)}
+                            />
+                          </td>
+                          <td className="py-3 text-right font-semibold">฿ {line.toLocaleString()}</td>
+                          <td className="py-3 text-right">
+                            <button
+                              className="rounded-xl border border-line px-3 py-1.5 text-sm hover:bg-stone-50 text-rose-600 transition"
+                              onClick={() => remove(it.productId)}
+                            >
+                              ลบ
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
             <div className="mt-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-end">
               <div className="text-right">
@@ -83,14 +131,13 @@ export default function CustomerCartPage() {
               <button
                 disabled={!canCheckout}
                 onClick={() => nav("/customer/checkout")}
-                className={`rounded-2xl px-5 py-3 text-sm font-semibold ${
-                  canCheckout ? "bg-black text-white hover:opacity-95" : "bg-stone-200 text-stone-500 cursor-not-allowed"
-                }`}
+                className={`rounded-2xl px-5 py-3 text-sm font-semibold ${canCheckout ? "bg-black text-white hover:opacity-95" : "bg-stone-200 text-stone-500 cursor-not-allowed"
+                  }`}
               >
                 ไปชำระเงิน
               </button>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

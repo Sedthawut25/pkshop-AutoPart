@@ -42,45 +42,79 @@ export default function CustomsDocumentsPage() {
         ) : q.isError ? (
           <div className="text-sm text-rose-700">โหลดเอกสารไม่สำเร็จ</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] text-sm">
-              <thead className="text-xs text-muted">
-                <tr className="border-b border-line">
-                  <th className="py-3 text-left font-medium">เลขที่เอกสาร</th>
-                  <th className="py-3 text-left font-medium">ประเภท</th>
-                  <th className="py-3 text-left font-medium">สถานะ</th>
-                  <th className="py-3 text-left font-medium">วันที่ส่ง</th>
-                  <th className="py-3 text-right font-medium">จัดการ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {docs.map((d) => (
-                  <tr key={d.id} className="border-b border-line">
-                    <td className="py-3">{d.docNumber || `DOC-${d.id}`}</td>
-                    <td className="py-3">{d.docType}</td>
-                    <td className="py-3"><DocStatusBadge status={d.status} /></td>
-                    <td className="py-3">{d.submittedAt || "-"}</td>
-                    <td className="py-3 text-right">
-                      <Link
-                        to={`/customs/documents/${d.id}`}
-                        className="rounded-xl border border-line bg-white px-3 py-1.5 text-sm hover:bg-stone-50"
-                      >
-                        เปิดดู
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+          <>
+            {/* 📱 Mobile Card View */}
+            <div className="md:hidden divide-y divide-line">
+              {docs.map((d) => (
+                <div key={d.id} className="py-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-bold text-sm text-ink">{d.docNumber || `DOC-${d.id}`}</div>
+                      <div className="text-xs text-muted mt-0.5">{d.docType}</div>
+                    </div>
+                    <DocStatusBadge status={d.status} />
+                  </div>
 
-                {docs.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="py-6 text-center text-sm text-muted">
-                      ไม่พบเอกสาร
-                    </td>
+                  <div className="flex items-center justify-between text-xs bg-stone-50 p-2.5 rounded-xl border border-stone-100">
+                    <span className="text-muted">วันที่ส่ง: <span className="font-medium text-ink">{d.submittedAt || "-"}</span></span>
+                  </div>
+
+                  <div className="flex justify-end">
+                    <Link
+                      to={`/customs/documents/${d.id}`}
+                      className="rounded-xl border border-line bg-white px-3 py-1.5 text-xs font-medium hover:bg-stone-50"
+                    >
+                      เปิดดู →
+                    </Link>
+                  </div>
+                </div>
+              ))}
+              {docs.length === 0 && (
+                <div className="py-8 text-center text-sm text-muted">ไม่พบเอกสาร</div>
+              )}
+            </div>
+
+            {/* 💻 Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full min-w-[680px] text-sm">
+                <thead className="text-xs text-muted">
+                  <tr className="border-b border-line">
+                    <th className="py-3 text-left font-medium">เลขที่เอกสาร</th>
+                    <th className="py-3 text-left font-medium">ประเภท</th>
+                    <th className="py-3 text-left font-medium">สถานะ</th>
+                    <th className="py-3 text-left font-medium">วันที่ส่ง</th>
+                    <th className="py-3 text-right font-medium">จัดการ</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {docs.map((d) => (
+                    <tr key={d.id} className="border-b border-line hover:bg-stone-50/50">
+                      <td className="py-3">{d.docNumber || `DOC-${d.id}`}</td>
+                      <td className="py-3">{d.docType}</td>
+                      <td className="py-3"><DocStatusBadge status={d.status} /></td>
+                      <td className="py-3">{d.submittedAt || "-"}</td>
+                      <td className="py-3 text-right">
+                        <Link
+                          to={`/customs/documents/${d.id}`}
+                          className="rounded-xl border border-line bg-white px-3 py-1.5 text-sm hover:bg-stone-50 transition"
+                        >
+                          เปิดดู
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {docs.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="py-6 text-center text-sm text-muted">
+                        ไม่พบเอกสาร
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </Card>
     </div>
