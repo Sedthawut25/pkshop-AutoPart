@@ -54,7 +54,7 @@ export default function SupplierPoListPage() {
         ) : (
           <div>
             {/* 📱 Mobile Card View */}
-            <div className="md:hidden divide-y divide-line">
+            <div className="xl:hidden divide-y divide-line">
               {rows.map((po) => (
                 <div key={po.id} className="p-4 space-y-3 bg-white">
                   <div className="flex justify-between items-start gap-2">
@@ -86,7 +86,7 @@ export default function SupplierPoListPage() {
             </div>
 
             {/* 💻 Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto">
+            <div className="hidden xl:block overflow-x-auto">
               <table className="w-full min-w-[760px] text-sm">
                 <thead className="text-xs text-muted">
                   <tr className="border-b border-line">

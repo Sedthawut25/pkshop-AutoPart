@@ -28,20 +28,20 @@ export default function CustomerHomePage() {
         </div>
 
         <div className="rounded-3xl border border-line bg-white p-6 md:col-span-2">
-          <div className="text-5xl font-semibold leading-tight">
+          <div className="text-4xl font-semibold leading-tight sm:text-5xl">
             ULTIMATE <span className="text-stone-300">SALE</span>
           </div>
           <div className="mt-2 text-sm text-muted">NEW COLLECTION</div>
-          <div className="mt-6 flex gap-3">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link
               to="/customer/shop"
-              className="rounded-2xl bg-black px-5 py-3 text-sm font-semibold text-white"
+              className="rounded-2xl bg-black px-5 py-3 text-center text-sm font-semibold text-white sm:text-left"
             >
               ซื้อตอนนี้
             </Link>
             <Link
               to="/customer/shop?sort=latest"
-              className="rounded-2xl border border-line px-5 py-3 text-sm font-semibold hover:bg-stone-50"
+              className="rounded-2xl border border-line px-5 py-3 text-center text-sm font-semibold hover:bg-stone-50 sm:text-left"
             >
               ดูสินค้าเข้าใหม่
             </Link>

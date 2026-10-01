@@ -142,7 +142,7 @@ export default function CustomerCheckoutPage() {
           <div className="rounded-3xl border border-line bg-white p-6">
             <div className="text-xl font-semibold">ที่อยู่จัดส่ง</div>
 
-            <div className="grid grid-cols-2 gap-3 mt-3">
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <input
                 placeholder="ชื่อ"
                 className="rounded-2xl border px-4 py-3 text-sm"

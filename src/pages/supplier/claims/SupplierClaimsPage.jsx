@@ -130,7 +130,7 @@ export default function SupplierClaimsPage() {
         </div>
       ) : null}
 
-      <div className="grid gap-3 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
         <Metric label="ทั้งหมด" value={counts.ALL || 0} />
         <Metric label="รอตอบ" value={counts.PENDING || 0} />
         <Metric label="อนุมัติ" value={counts.APPROVED || 0} />
@@ -146,7 +146,87 @@ export default function SupplierClaimsPage() {
             โหลดรายการเคลมไม่สำเร็จ ({getApiErrorMessage(listQuery.error)})
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+            <div className="divide-y divide-line xl:hidden">
+              {rows.map((claim) => {
+                const attachments = getAttachmentUrls(claim);
+                return (
+                  <div key={claim.id} className="space-y-3 py-4 first:pt-0 last:pb-0">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-xs text-muted">
+                          #{claim.id} · {formatDateTime(claim.createdAt)}
+                        </div>
+                        <div className="mt-1 break-words font-semibold text-ink">
+                          {claim.productName || "-"}
+                        </div>
+                        <div className="text-xs text-muted">
+                          {claimTypeLabel(claim.claimType)}
+                        </div>
+                      </div>
+                      <ClaimStatusBadge status={claim.status} />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div className="col-span-2 min-w-0">
+                        <div className="text-xs text-muted">PO / Admin</div>
+                        <div className="break-words font-medium">
+                          {claim.poNumber || `PO-${claim.purchaseOrderId}`} · {supplierDisplayName(claim.admin)}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted">จำนวน</div>
+                        <div className="font-medium">{claim.quantity ?? "-"}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted">ยอดเงิน</div>
+                        <div className="font-medium">{formatClaimMoney(claim.refundAmount)}</div>
+                      </div>
+                    </div>
+
+                    {attachments.length > 0 ? (
+                      <div className="flex gap-2 overflow-x-auto pb-1">
+                        {attachments.map((url, index) => (
+                          <button
+                            key={`${url}-${index}`}
+                            type="button"
+                            onClick={() => setSelectedImage(url)}
+                            className="h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-line bg-stone-50"
+                            aria-label={`ดูรูปหลักฐาน ${index + 1}`}
+                          >
+                            <img
+                              src={url}
+                              alt="หลักฐานเคลม"
+                              className="h-full w-full object-cover"
+                              onError={(event) => {
+                                event.currentTarget.onerror = null;
+                                event.currentTarget.src = "https://placehold.co/600x400?text=No+Image";
+                              }}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-muted">ไม่มีรูปภาพ</div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => openDetail(claim)}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-line bg-white px-3 py-2 text-sm hover:bg-stone-50"
+                    >
+                      <Eye size={15} />
+                      ดูรายละเอียด
+                    </button>
+                  </div>
+                );
+              })}
+              {rows.length === 0 ? (
+                <div className="py-8 text-center text-sm text-muted">ไม่พบรายการเคลม</div>
+              ) : null}
+            </div>
+
+            <div className="hidden overflow-x-auto xl:block">
             <table className="w-full min-w-[980px] text-sm">
               <thead className="text-xs text-muted">
                 <tr className="border-b border-line">
@@ -239,7 +319,8 @@ export default function SupplierClaimsPage() {
                 )}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
       </Card>
 

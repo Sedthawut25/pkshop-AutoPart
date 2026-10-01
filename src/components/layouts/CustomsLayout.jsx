@@ -44,7 +44,7 @@ export default function CustomsLayout() {
           </div>
         )}
 
-        <main className="flex-1">
+        <main className="min-w-0 flex-1">
           <div className="mx-auto w-full max-w-[92rem] p-4 sm:p-5 md:p-7">
             <Outlet />
           </div>

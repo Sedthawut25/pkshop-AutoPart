@@ -17,7 +17,7 @@ export default function CustomsSidebar({ onNavigate }) {
   }
 
   return (
-    <aside className="sticky top-0 h-screen w-64 border-r border-line/80 bg-white/90 shadow-[8px_0_30px_rgba(23,33,31,0.03)]">
+    <aside className="sticky top-0 flex h-screen w-64 flex-col border-r border-line/80 bg-white/90 shadow-[8px_0_30px_rgba(23,33,31,0.03)]">
       <div className="border-b border-line/70 px-5 py-6">
         <div className="flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand text-lg font-bold text-ink shadow-[0_8px_18px_rgba(15,118,110,0.25)]">
@@ -30,7 +30,7 @@ export default function CustomsSidebar({ onNavigate }) {
         </div>
       </div>
 
-      <nav className="px-3">
+      <nav className="flex-1 overflow-y-auto px-3">
         {items.map((n) => (
           <NavLink
             key={n.to}

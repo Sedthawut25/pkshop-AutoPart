@@ -75,7 +75,7 @@ export default function CustomerRequestPage() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto p-6 space-y-8">
+        <div className="mx-auto max-w-6xl space-y-8 p-4 sm:p-6">
             <div>
                 <h1 className="text-3xl font-bold text-stone-800">ส่งคำขออะไหล่</h1>
                 <p className="text-stone-500 mt-2">หากค้นหาอะไหล่ไหนไม่เจอ สามารถแจ้งรายละเอียดให้ทางเราจัดการหาให้ได้</p>
@@ -98,7 +98,7 @@ export default function CustomerRequestPage() {
                                 placeholder="ปั้มน้ำ แบตเตอรี่"
                             />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-stone-700 ">ยี่ห้อรถ</label>
                                 <input 

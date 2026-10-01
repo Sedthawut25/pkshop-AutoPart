@@ -105,7 +105,7 @@ export default function SupplierLayout() {
         </aside>
 
         {/* ✅ Content */}
-        <main className="flex-1">
+        <main className="min-w-0 flex-1">
           {/* Desktop header (เหมือน admin/customs มีหัวข้างบน) */}
           <div className="hidden border-b border-line/80 bg-white/85 shadow-sm md:block">
             <div className="flex items-center justify-between border-l-2 border-brand px-6 py-5">

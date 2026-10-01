@@ -166,7 +166,38 @@ export default function CustomsDocumentDetailPage() {
               <Badge tone="gray">{items.length} รายการ</Badge>
             </div>
 
-            <div className="mt-4 overflow-x-auto">
+            <div className="mt-4 divide-y divide-line lg:hidden">
+              {items.map((it) => {
+                const line = it?.lineCost ?? it?.lineTotal;
+                const unit = it?.unitCost ?? it?.quotedUnitCost;
+                return (
+                  <div key={it.productId ?? it.id} className="space-y-2 py-4 first:pt-0 last:pb-0">
+                    <div className="break-words font-medium">{it.productName ?? "-"}</div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <div className="text-xs text-muted">จำนวน</div>
+                        <div>{it.qty ?? "-"}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted">ต้นทุน/หน่วย</div>
+                        <div>{fmtMoney(unit)}</div>
+                      </div>
+                      <div className="col-span-2">
+                        <div className="text-xs text-muted">รวม</div>
+                        <div className="font-semibold">{fmtMoney(line)}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {items.length === 0 ? (
+                <div className="py-6 text-center text-sm text-muted">
+                  ไม่มีรายการสินค้า
+                </div>
+              ) : null}
+            </div>
+
+            <div className="mt-4 hidden overflow-x-auto lg:block">
               <table className="w-full min-w-[620px] text-sm">
                 <thead className="text-xs text-muted">
                   <tr className="border-b border-line">

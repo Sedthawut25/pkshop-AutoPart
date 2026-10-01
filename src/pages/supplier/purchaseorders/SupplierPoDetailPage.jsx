@@ -106,7 +106,59 @@ export default function SupplierPoDetailPage() {
               <Badge tone="gray">{items.length} รายการ</Badge>
             </div>
 
-            <div className="mt-4 overflow-x-auto">
+            <div className="mt-4 divide-y divide-line lg:hidden">
+              {items.map((it) => (
+                <div key={it.productId} className="space-y-3 py-4 first:pt-0 last:pb-0">
+                  <div>
+                    <div className="break-words font-medium">{it.productName || "-"}</div>
+                    <div className="text-xs text-muted">
+                      จำนวนที่สั่ง: {it.qty ?? "-"} ชิ้น
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <label className="space-y-1 text-xs text-muted">
+                      <span>ราคาต่อชิ้น*</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-right text-ink"
+                        value={quoteRows[it.productId]?.quotedUnitCost ?? ""}
+                        onChange={(event) =>
+                          setRow(it.productId, {
+                            quotedUnitCost: event.target.value,
+                          })
+                        }
+                        placeholder="0.00"
+                      />
+                    </label>
+                    <label className="space-y-1 text-xs text-muted">
+                      <span>Lead Time (วัน)</span>
+                      <input
+                        type="number"
+                        min="0"
+                        className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm text-right text-ink"
+                        value={quoteRows[it.productId]?.leadTimeDays ?? ""}
+                        onChange={(event) =>
+                          setRow(it.productId, {
+                            leadTimeDays: event.target.value,
+                          })
+                        }
+                        placeholder="-"
+                      />
+                    </label>
+                  </div>
+                </div>
+              ))}
+              {items.length === 0 ? (
+                <div className="py-6 text-center text-sm text-muted">
+                  ไม่มีรายการสินค้า
+                </div>
+              ) : null}
+            </div>
+
+            <div className="mt-4 hidden overflow-x-auto lg:block">
               <table className="w-full min-w-[700px] text-sm">
                 <thead className="text-xs text-muted">
                   <tr className="border-b border-line">

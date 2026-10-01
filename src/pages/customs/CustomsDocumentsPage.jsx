@@ -44,7 +44,7 @@ export default function CustomsDocumentsPage() {
         ) : (
           <>
             {/* 📱 Mobile Card View */}
-            <div className="md:hidden divide-y divide-line">
+            <div className="lg:hidden divide-y divide-line">
               {docs.map((d) => (
                 <div key={d.id} className="py-4 space-y-3">
                   <div className="flex items-start justify-between gap-2">
@@ -75,7 +75,7 @@ export default function CustomsDocumentsPage() {
             </div>
 
             {/* 💻 Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto">
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full min-w-[680px] text-sm">
                 <thead className="text-xs text-muted">
                   <tr className="border-b border-line">
