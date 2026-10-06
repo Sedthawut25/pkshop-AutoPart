@@ -337,7 +337,6 @@ export default function CustomerHistoryDetailPage() {
                                 id="claimImage"
                                 type="file"
                                 accept="image/*"
-                                capture="environment"
                                 disabled={isUploading}
                                 className="w-full text-xs text-stone-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-stone-900 file:text-white hover:file:bg-stone-800 cursor-pointer disabled:opacity-50"
                                 onChange={handleFileUpload}
