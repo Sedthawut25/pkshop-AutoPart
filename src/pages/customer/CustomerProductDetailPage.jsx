@@ -6,8 +6,11 @@ import { customerProductsApi } from "../../api/customerProduct";
 import ProductCard from "../../components/customer/ProductCard";
 import { useCart } from "./cart/CartContext";
 import { ArrowLeft, Check, Minus, Package, Plus, ShieldCheck } from "lucide-react";
+import Modal from "../../components/ui/Modal";
+import { authStorage } from "../../utils/authStorage";
 
 export default function CustomerProductDetailPage() {
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const { id } = useParams();
   const nav = useNavigate();
   const { add } = useCart();
@@ -201,6 +204,10 @@ export default function CustomerProductDetailPage() {
                 <button
                   disabled={!canAdd}
                   onClick={() => {
+                    if (!authStorage.token() || authStorage.role() !== "CUSTOMER"){
+                      setShowLoginPrompt(true);
+                      return;
+                    }
                     add(
                       {
                         productId: p.id,
@@ -258,6 +265,32 @@ export default function CustomerProductDetailPage() {
           </div>
         </section>
       )}
+      <Modal
+        open = {showLoginPrompt}
+        title="กรุณาสมัครสมาชิกก่อนซื้อสินค้า"
+        onClose={() => setShowLoginPrompt(false)}
+      >
+        <p className="text-sm text-muted">
+          กรุณาเข้าสู่ระบบหรือสมัคสมาชิกก่อนสั่งซื้อสินค้า
+        </p>
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Link
+            to="/customer/login"
+            className="rounded-xl bg-ink px-4 py-3 text-center text-sm font-semibold text-white"
+          >
+            เข้าสู่ระบบ
+          </Link>
+
+          <Link
+            to="/customer/register"
+            className="rounded-xl border border-line px-4 py-3 text-center text-sm font-semibold text-ink"
+          >
+            สมัครสมาชิก
+
+          </Link>
+        </div>
+
+      </Modal>
     </div>
   );
 }

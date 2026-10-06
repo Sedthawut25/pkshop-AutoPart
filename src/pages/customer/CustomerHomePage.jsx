@@ -99,20 +99,25 @@ export default function CustomerHomePage() {
         <div className="text-sm font-semibold">แบรนด์ที่รองรับ</div>
         <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-8">
           {[
-            "BMW",
-            "Honda",
-            "Benz",
-            "Ford",
-            "Toyota",
-            "Mazda",
-            "Audi",
-            "Nissan",
-          ].map((b) => (
+            { name: "BMW", logo: "/brands/bmw.webp" },
+            { name: "Honda", logo: "/brands/honda.jpg" },
+            { name: "Benz", logo: "/brands/benz.webp" },
+            { name: "Ford", logo: "/brands/ford.webp" },
+            { name: "Toyota", logo: "/brands/toyota.jpg" },
+            { name: "Mazda", logo: "/brands/mazda.png" },
+            { name: "Audi", logo: "/brands/audi.png" },
+            { name: "Nissan", logo: "/brands/nissan.jpg" },
+          ].map((brand) => (
             <div
-              key={b}
-              className="rounded-2xl bg-stone-50 px-3 py-4 text-center text-xs font-semibold"
+              key={brand.name}
+              className="flex min-h-20 items-center justify-center rounded-2xl bg-stone-50 p-3"
             >
-              {b}
+              <img
+                src={brand.logo}
+                alt={`${brand.name} logo`}
+                className="h-10 w-full object-contain"
+                loading="lazy"
+              />
             </div>
           ))}
         </div>

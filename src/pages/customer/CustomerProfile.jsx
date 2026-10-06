@@ -2,6 +2,14 @@ import React, { useEffect, useState } from 'react'
 
 const API_BASE = '/api/customer'
 
+const readJsonResponse = async (response) => {
+    const contentType = response.headers.get('content-type') || ''
+    if (!contentType.toLowerCase().includes('json')) {
+        throw new Error('เซิร์ฟเวอร์ส่งข้อมูลไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง')
+    }
+    return response.json()
+}
+
 export default function CustomerProfile() {
     const [isProfileLoading, setIsProfileLoading] = useState(false)
     const [isPasswordLoading, setIsPasswordLoading] = useState(false)
@@ -60,7 +68,8 @@ export default function CustomerProfile() {
                 throw new Error('ไม่สามารถดึงข้อมูลโปรไฟล์ได้')
             }
 
-            const data = await res.json()
+            const payload = await readJsonResponse(res)
+            const data = payload?.data ?? payload
             setFormData({
                 fullName: data.fullName || '',
                 email: data.email || '',
@@ -96,7 +105,8 @@ export default function CustomerProfile() {
                 throw new Error('อัปเดตข้อมูลไม่สำเร็จ')
             }
 
-            const data = await res.json()
+            const payload = await readJsonResponse(res)
+            const data = payload?.data ?? payload
             setSuccessMsg(data.message || 'อัปเดตข้อมูลส่วนตัวสำเร็จ')
         } catch (err) {
             setErrorMsg(getErrorMessage(err))
