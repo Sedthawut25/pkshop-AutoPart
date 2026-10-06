@@ -65,7 +65,12 @@ export default function CustomerHistoryDetailPage() {
         try {
             const uploadRes = await api.post(
                 "/api/upload/image",
-                formData
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
             );
 
             const uploadedUrl = uploadRes.data?.data || uploadRes.data;
@@ -77,9 +82,11 @@ export default function CustomerHistoryDetailPage() {
             }
         } catch (err) {
             console.error("Upload error:", err);
-            alert("เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ");
+            const message = err.response?.data?.message || err.message;
+            alert(`อัปโหลดรูปภาพไม่สำเร็จ: ${message}`);
         } finally {
             setIsUploading(false);
+            e.target.value = "";
         }
     };
 
@@ -100,11 +107,6 @@ export default function CustomerHistoryDetailPage() {
                     claimType: claimForm.claimType,
                     description: claimForm.description,
                     imageUrl: claimForm.imageUrl, // 🟢 ส่ง URL ที่ได้จากการอัปโหลดไปให้ Backend
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
                 }
             );
             alert("ส่งคำขอเคลมเรียบร้อยแล้ว");

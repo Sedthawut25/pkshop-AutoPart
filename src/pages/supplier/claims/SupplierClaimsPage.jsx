@@ -185,26 +185,31 @@ export default function SupplierClaimsPage() {
                     </div>
 
                     {attachments.length > 0 ? (
-                      <div className="flex gap-2 overflow-x-auto pb-1">
-                        {attachments.map((url, index) => (
-                          <button
-                            key={`${url}-${index}`}
-                            type="button"
-                            onClick={() => setSelectedImage(url)}
-                            className="h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-line bg-stone-50"
-                            aria-label={`ดูรูปหลักฐาน ${index + 1}`}
-                          >
-                            <img
-                              src={url}
-                              alt="หลักฐานเคลม"
-                              className="h-full w-full object-cover"
-                              onError={(event) => {
-                                event.currentTarget.onerror = null;
-                                event.currentTarget.src = "https://placehold.co/600x400?text=No+Image";
-                              }}
-                            />
-                          </button>
-                        ))}
+                      <div className="space-y-2">
+                        <div className="text-xs font-semibold text-muted">
+                          รูปหลักฐาน ({attachments.length})
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {attachments.map((url, index) => (
+                            <button
+                              key={`${url}-${index}`}
+                              type="button"
+                              onClick={() => setSelectedImage(url)}
+                              className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-line bg-stone-50"
+                              aria-label={`ดูรูปหลักฐาน ${index + 1}`}
+                            >
+                              <img
+                                src={url}
+                                alt={`รูปหลักฐาน ${index + 1}`}
+                                className="h-full w-full object-cover"
+                                onError={(event) => {
+                                  event.currentTarget.onerror = null;
+                                  event.currentTarget.src = "https://placehold.co/600x400?text=No+Image";
+                                }}
+                              />
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     ) : (
                       <div className="text-xs text-muted">ไม่มีรูปภาพ</div>
@@ -263,21 +268,19 @@ export default function SupplierClaimsPage() {
                           <button
                             type="button"
                             onClick={() => setSelectedImage(attachments[0])}
-                            className="group relative inline-block h-12 w-12 overflow-hidden rounded-xl border border-line bg-stone-50"
+                            className="inline-flex items-center gap-2 rounded-xl border border-line bg-white p-1.5 text-xs font-medium hover:bg-stone-50"
                             title="คลิกเพื่อดูรูปภาพขนาดใหญ่"
                           >
                             <img
                               src={attachments[0]}
                               alt="หลักฐาน"
-                              className="h-full w-full object-cover transition duration-200 group-hover:scale-110"
+                              className="h-10 w-10 rounded-lg object-cover"
                               onError={(e) => {
                                 e.currentTarget.onerror = null;
                                 e.currentTarget.src = "https://placehold.co/600x400?text=No+Image";
                               }}
                             />
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition duration-200 group-hover:opacity-100">
-                              <Eye className="h-4 w-4 text-white" />
-                            </div>
+                            <span className="whitespace-nowrap">ดูรูป ({attachments.length})</span>
                           </button>
                         ) : (
                           <span className="text-xs text-muted">ไม่มีรูปภาพ</span>

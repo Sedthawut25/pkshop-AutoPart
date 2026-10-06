@@ -1,34 +1,48 @@
 import { useEffect, useState } from "react";
+import { adminCommonApi } from "../../../api/adminCommon";
+import api from "../../../api/axios";
 
 export default function AdminSupplierPage() {
   const [supplier, setSupplier] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [keyword, setKeyWord] = useState("");
-
-  const token = localStorage.getItem("pk_token");
+  const [keyword, setKeyword] = useState("");
 
   useEffect(() => {
-    fetchSupplier();
+    void fetchSupplier();
   }, []);
 
   const fetchSupplier = async () => {
     try {
       setLoading(true);
+      const [accounts, profilesResponse] = await Promise.all([
+        adminCommonApi.suppliers(),
+        api.get("/api/admin/suppliers", { params: { page: 0, size: 1000 } })
+          .catch((error) => {
+            console.error("Unable to load supplier profiles:", error);
+            return null;
+          }),
+      ]);
 
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/admin/suppliers`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+      const profilePage = profilesResponse?.data?.content
+        ? profilesResponse.data
+        : profilesResponse?.data?.data;
+      const profiles = profilePage?.content || [];
+      const profilesByUserId = new Map(
+        profiles.map((profile) => [Number(profile.supplierId), profile]),
       );
 
-      const json = await res.json();
-
-      console.log(json);
-
-      setSupplier(json?.content || []);
+      setSupplier(
+        accounts.map((account) => {
+          const profile = profilesByUserId.get(Number(account.id));
+          return {
+            supplierId: account.id,
+            companyName: profile?.companyName || account.fullName || account.email || "-",
+            contactName: profile?.contactName || account.fullName || "-",
+            contactEmail: profile?.contactEmail || account.email || "-",
+            contactPhone: profile?.contactPhone || account.phone || "-",
+          };
+        }),
+      );
     } catch (err) {
       console.error(err);
     } finally {
@@ -36,96 +50,94 @@ export default function AdminSupplierPage() {
     }
   };
 
+  const searchTerm = keyword.trim().toLocaleLowerCase();
+  const filteredSuppliers = supplier.filter((item) =>
+    [item.companyName, item.contactName, item.contactEmail, item.contactPhone]
+      .some((value) => String(value || "").toLocaleLowerCase().includes(searchTerm)),
+  );
+  const emptyMessage = supplier.length === 0
+    ? "ไม่มีข้อมูลซัพพลายเออร์"
+    : "ไม่พบซัพพลายเออร์ที่ตรงกับคำค้นหา";
+
   return (
     <div className="space-y-6">
       <div>
         <div className="text-3xl font-semibold">จัดการซัพพลายเออร์</div>
-        <div className="text-sm text-muted mt-1">รายชื่อบริษัทซัพพลายเออร์</div>
+        <div className="mt-1 text-sm text-muted">รายชื่อบริษัทซัพพลายเออร์</div>
       </div>
 
-      {/* SEARCH */}
       <div className="rounded-3xl border border-line bg-white p-4">
         <input
           className="w-full rounded-2xl border px-3 py-3 text-sm"
           placeholder="ค้นหาชื่อบริษัทหรืออีเมล"
           value={keyword}
-          onChange={(e) => setKeyWord(e.target.value)}
+          onChange={(event) => setKeyword(event.target.value)}
         />
       </div>
 
-      <div className="rounded-3xl border border-line bg-white overflow-hidden">
-        {/* 📱 Mobile Card View */}
-        <div className="md:hidden divide-y divide-line">
-          {loading ? (
+      <div className="overflow-hidden rounded-3xl border border-line bg-white">
+        <div className="divide-y divide-line md:hidden">
+          {loading && (
             <div className="p-6 text-center text-sm text-muted">กำลังโหลด...</div>
-          ) : supplier.length === 0 ? (
-            <div className="p-6 text-center text-sm text-muted">ไม่มีข้อมูลซัพพลายเออร์</div>
-          ) : (
-            supplier.map((s) => (
-              <div key={s.supplierId} className="p-4 space-y-2">
-                <div className="flex justify-between items-start gap-2">
+          )}
+          {!loading && filteredSuppliers.length === 0 && (
+            <div className="p-6 text-center text-sm text-muted">{emptyMessage}</div>
+          )}
+          {!loading && filteredSuppliers.length > 0 &&
+            filteredSuppliers.map((s) => (
+              <div key={s.supplierId} className="space-y-2 p-4">
+                <div>
+                  <div className="text-sm font-bold text-ink">{s.companyName}</div>
+                  <div className="mt-0.5 text-xs text-muted">ผู้ติดต่อ: {s.contactName}</div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 rounded-xl border border-line bg-stone-50 p-2.5 text-xs">
                   <div>
-                    <div className="font-bold text-sm text-ink">{s.companyName}</div>
-                    <div className="text-xs text-muted mt-0.5">ผู้ติดต่อ: {s.contactName}</div>
+                    <span className="text-muted">อีเมล:</span>
+                    <span className="block truncate font-medium text-ink">{s.contactEmail}</span>
                   </div>
-                  <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-semibold text-stone-700">
-                    {s.country || "-"}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs bg-stone-50 p-2.5 rounded-xl border border-stone-100">
-                  <div><span className="text-muted">อีเมล:</span> <span className="font-medium text-ink block truncate">{s.contactEmail}</span></div>
-                  <div><span className="text-muted">เบอร์โทร:</span> <span className="font-medium text-ink block">{s.contactPhone || "-"}</span></div>
-                </div>
-
-                <div className="text-[11px] text-stone-400 flex justify-end pt-1">
-                  <span>วันที่สร้าง: {new Date(s.createdAt).toLocaleDateString()}</span>
+                  <div>
+                    <span className="text-muted">เบอร์โทร:</span>
+                    <span className="block font-medium text-ink">{s.contactPhone || "-"}</span>
+                  </div>
                 </div>
               </div>
-            ))
-          )}
+            ))}
         </div>
 
-        {/* 💻 Desktop Table View */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full min-w-[700px] text-sm">
+        <div className="hidden overflow-x-auto md:block">
+          <table className="w-full min-w-[560px] text-sm">
             <thead className="bg-stone-50">
               <tr className="text-left text-xs text-muted">
                 <th className="px-4 py-3">บริษัท</th>
                 <th className="px-4 py-3">ชื่อผู้ติดต่อ</th>
                 <th className="px-4 py-3">อีเมล</th>
-                <th className="px-4 py-3">ประเทศ</th>
                 <th className="px-4 py-3">เบอร์โทร</th>
-                <th className="px-4 py-3">วันที่สร้าง</th>
               </tr>
             </thead>
             <tbody>
-              {loading ? (
+              {loading && (
                 <tr>
-                  <td colSpan="6" className="px-4 py-6 text-center text-muted">
-                    กำลังโหลด....
+                  <td colSpan="4" className="px-4 py-6 text-center text-muted">
+                    กำลังโหลด...
                   </td>
                 </tr>
-              ) : supplier.length === 0 ? (
+              )}
+              {!loading && filteredSuppliers.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="px-4 py-6 text-center text-muted">
-                    ไม่มีข้อมูลซัพพลายเออร์
+                  <td colSpan="4" className="px-4 py-6 text-center text-muted">
+                    {emptyMessage}
                   </td>
                 </tr>
-              ) : (
-                supplier.map((s) => (
+              )}
+              {!loading && filteredSuppliers.length > 0 &&
+                filteredSuppliers.map((s) => (
                   <tr key={s.supplierId} className="border-t border-line hover:bg-stone-50/50">
                     <td className="px-4 py-3.5 font-medium text-ink">{s.companyName}</td>
                     <td className="px-4 py-3.5 font-medium">{s.contactName}</td>
                     <td className="px-4 py-3.5 text-stone-600">{s.contactEmail}</td>
-                    <td className="px-4 py-3.5">{s.country || "-"}</td>
                     <td className="px-4 py-3.5">{s.contactPhone || "-"}</td>
-                    <td className="px-4 py-3.5 text-stone-500 text-xs">
-                      {new Date(s.createdAt).toLocaleDateString()}
-                    </td>
                   </tr>
-                ))
-              )}
+                ))}
             </tbody>
           </table>
         </div>
