@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../../api/auth";
-import { authStorage } from "../../utils/authStorage";
 import { ArrowRight, LockKeyhole, ShieldCheck } from "lucide-react";
+
+const STAFF_LOGIN_ROLES = new Set(["ADMIN", "SUPPLIER", "CUSTOMS"]);
+
+function normalizeRole(role) {
+  return String(role || "").replace(/^ROLE_/i, "").toUpperCase();
+}
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -36,24 +41,31 @@ export default function LoginPage() {
         password: password.trim(),
       });
 
-      if (!token || !role) {
-        throw new Error("Login response missing token/role");
+      if (!token) throw new Error("Login response missing token");
+
+      const availableRoles = Array.isArray(roles) ? roles : [];
+      const roleCandidates = role ? [...availableRoles, role] : availableRoles;
+      const normalizedRoles = [...new Set(roleCandidates.map(normalizeRole))];
+      const loginRole = normalizedRoles.find((candidate) =>
+        STAFF_LOGIN_ROLES.has(candidate),
+      );
+
+      if (!loginRole) {
+        throw new Error("บัญชีนี้ไม่มีสิทธิ์เข้าสู่ระบบจัดการ กรุณาใช้หน้าลูกค้าแทน");
       }
 
       // ✅ เก็บให้ตรงกับ axios interceptor ของคุณ (อ่าน pk_token)
       localStorage.setItem("pk_token", token);
-      localStorage.setItem("pk_role", role);
-      localStorage.setItem("pk_roles", JSON.stringify(roles || []));
+      localStorage.setItem("pk_role", loginRole);
+      localStorage.setItem("pk_roles", JSON.stringify(normalizedRoles));
       localStorage.setItem("pk_user", JSON.stringify(user || null));
 
       // ถ้าคุณอยากใช้ authStorage ก็ใช้ได้ แต่ต้องมั่นใจว่า key ตรงกัน
       // authStorage.setAuth({ token, role, user });
 
-      if (role === "ADMIN") navigate("/admin/dashboard", { replace: true });
-      else if (role === "CUSTOMER") navigate("/", { replace: true });
-      else if (role === "SUPPLIER") navigate("/supplier", { replace: true });
-      else if (role === "CUSTOMS") navigate("/customs", { replace: true });
-      else navigate("/", { replace: true });
+      if (loginRole === "ADMIN") navigate("/admin/dashboard", { replace: true });
+      else if (loginRole === "SUPPLIER") navigate("/supplier", { replace: true });
+      else navigate("/customs/documents", { replace: true });
     } catch (err) {
       const status = err?.response?.status;
       const msgFromApi =
@@ -118,8 +130,9 @@ export default function LoginPage() {
           ) : null}
 
           <div>
-            <label className="text-xs font-semibold text-ink">อีเมล</label>
+            <label htmlFor="staff-email" className="text-xs font-semibold text-ink">อีเมล</label>
             <input
+              id="staff-email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               type="email"
@@ -129,8 +142,9 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-ink">รหัสผ่าน</label>
+            <label htmlFor="staff-password" className="text-xs font-semibold text-ink">รหัสผ่าน</label>
             <input
+              id="staff-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
@@ -140,6 +154,7 @@ export default function LoginPage() {
           </div>
 
           <button
+            type="submit"
             disabled={!canSubmit}
             className={`w-full rounded-xl px-3 py-2 text-sm font-medium ${
               canSubmit

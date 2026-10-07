@@ -4,6 +4,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../../../api/auth";
 import { useUser, useAuth, SignInButton } from "@clerk/clerk-react";
 
+function normalizeRole(role) {
+  return String(role || "").replace(/^ROLE_/i, "").toUpperCase();
+}
+
 export default function CustomerLoginPage() {
   const nav = useNavigate();
   const [email, setEmail] = useState("");
@@ -12,7 +16,7 @@ export default function CustomerLoginPage() {
   const [errorMsg, setErrorMsg] = useState("");
 
   const { isSignedIn, user, isLoaded } = useUser();
-  const { getToken } = useAuth();
+  const { getToken, signOut } = useAuth();
   const isProcessingGoogle = useRef(false);
 
   const canSubmit = email.trim() && password.trim() && !loading;
@@ -39,9 +43,10 @@ export default function CustomerLoginPage() {
           console.log("✅ ตอบกลับจาก Spring Boot:", res);
 
           const pkToken = res.accessToken || res.token;
-          const pkRoles = res.roles || [];
-          // fallback ใส่ "CUSTOMER" เผื่อ API ส่ง role มาไม่ครบ แล้ว Route Guard จะได้ไม่เตะออก
-          const pkRole = pkRoles[0] || res.role || "CUSTOMER";
+          const pkRoles = Array.isArray(res.roles) ? res.roles : [];
+          const hasCustomerRole = [res.role, ...pkRoles]
+            .map(normalizeRole)
+            .includes("CUSTOMER");
           const pkUser = {
             id: res.userId,
             email: res.email,
@@ -49,10 +54,15 @@ export default function CustomerLoginPage() {
           };
 
           if (!pkToken) throw new Error("ไม่พบ Token จากระบบ");
+          if (!hasCustomerRole) {
+            setErrorMsg("บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานหน้าลูกค้า กรุณาใช้หน้าเข้าสู่ระบบที่ตรงกับบัญชี");
+            await signOut();
+            return;
+          }
 
           localStorage.setItem("pk_token", pkToken);
-          localStorage.setItem("pk_role", pkRole);
-          localStorage.setItem("pk_roles", JSON.stringify(pkRoles));
+          localStorage.setItem("pk_role", "CUSTOMER");
+          localStorage.setItem("pk_roles", JSON.stringify(pkRoles.map(normalizeRole)));
           localStorage.setItem("pk_user", JSON.stringify(pkUser));
 
           console.log("🎉 ล็อกอินสำเร็จ! กำลังพาไปหน้า /customer");
@@ -67,7 +77,7 @@ export default function CustomerLoginPage() {
         }
       }
     };
-    handleGoogleSync();
+    void handleGoogleSync();
   }, [isLoaded, isSignedIn, user, getToken, nav]);
 
   async function onSubmit(e) {
@@ -76,17 +86,23 @@ export default function CustomerLoginPage() {
 
     try {
       setLoading(true);
-      const { token, role, roles, user } = await authApi.login({
+          const { token, role, roles, user } = await authApi.login({
         email: email.trim(),
         password: password.trim(),
       });
 
-      if (!token || !(role || (roles || []).length))
-        throw new Error("Missing token/role");
+      if (!token) throw new Error("Missing token");
+
+      const availableRoles = [role, ...(Array.isArray(roles) ? roles : [])]
+        .map(normalizeRole);
+      if (!availableRoles.includes("CUSTOMER")) {
+        setErrorMsg("บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานหน้าลูกค้า กรุณาใช้หน้าเข้าสู่ระบบที่ตรงกับบัญชี");
+        return;
+      }
 
       localStorage.setItem("pk_token", token);
-      localStorage.setItem("pk_role", role || roles?.[0]);
-      localStorage.setItem("pk_roles", JSON.stringify(roles || []));
+      localStorage.setItem("pk_role", "CUSTOMER");
+      localStorage.setItem("pk_roles", JSON.stringify(availableRoles));
       localStorage.setItem("pk_user", JSON.stringify(user || null));
 
       nav("/customer", { replace: true });
@@ -149,8 +165,9 @@ export default function CustomerLoginPage() {
                 ) : null}
 
                 <div>
-                  <label className="text-xs text-stone-300">Email</label>
+                    <label htmlFor="customer-email" className="text-xs text-stone-300">Email</label>
                   <input
+                      id="customer-email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       type="email"
@@ -160,8 +177,9 @@ export default function CustomerLoginPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs text-stone-300">Password</label>
+                    <label htmlFor="customer-password" className="text-xs text-stone-300">Password</label>
                   <input
+                      id="customer-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       type="password"
@@ -171,6 +189,7 @@ export default function CustomerLoginPage() {
                 </div>
 
                 <button
+                  type="submit"
                     disabled={!canSubmit}
                     className={`w-full rounded-2xl px-4 py-3 text-sm font-semibold transition-all ${
                         canSubmit
