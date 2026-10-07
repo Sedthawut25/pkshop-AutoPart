@@ -36,10 +36,10 @@ export default function CustomsLoginPage() {
 
       authStorage.setAuth({ token, role, user });
       nav("/customs/documents", { replace: true });
-    } catch (e2) {
-      const status = e2?.response?.status;
+    } catch (error) {
+      const status = error?.response?.status;
       if (status === 401 || status === 403) setErr("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-      else setErr(e2?.message || "เข้าสู่ระบบไม่สำเร็จ");
+      else setErr(error?.message || "เข้าสู่ระบบไม่สำเร็จ");
     } finally {
       setLoading(false);
     }
@@ -72,14 +72,15 @@ export default function CustomsLoginPage() {
 
         <form className="space-y-5" onSubmit={onSubmit}>
           {err ? (
-            <div className="rounded-xl border border-rose-200/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">
+            <div className="rounded-xl border border-red-300 bg-red-100 px-3 py-2 text-sm text-red-800">
               {err}
             </div>
           ) : null}
 
           <div>
-            <label className="text-xs font-semibold text-ink">อีเมล</label>
+            <label htmlFor="customs-email" className="text-xs font-semibold text-ink">อีเมล</label>
             <input
+              id="customs-email"
               className="mt-2 w-full rounded-2xl border border-line bg-paper px-4 py-3 text-sm text-ink outline-none focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/10"
               placeholder="customs@pkshop.com"
               value={email}
@@ -88,8 +89,9 @@ export default function CustomsLoginPage() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-ink">รหัสผ่าน</label>
+            <label htmlFor="customs-password" className="text-xs font-semibold text-ink">รหัสผ่าน</label>
             <input
+              id="customs-password"
               type="password"
               className="mt-2 w-full rounded-2xl border border-line bg-paper px-4 py-3 text-sm text-ink outline-none focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/10"
               placeholder="••••••••"
@@ -99,8 +101,9 @@ export default function CustomsLoginPage() {
           </div>
 
           <button
+            type="submit"
             disabled={loading}
-            className={`w-full rounded-xl px-3 py-2 text-sm font-medium ${
+            className={`flex w-full items-center justify-center rounded-xl px-3 py-2 text-sm font-medium ${
               loading ? "cursor-not-allowed bg-stone-200 text-stone-500" : "bg-brand text-white shadow-sm hover:bg-brand-dark"
             }`}
           >

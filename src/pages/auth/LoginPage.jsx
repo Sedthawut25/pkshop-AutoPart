@@ -124,7 +124,7 @@ export default function LoginPage() {
 
         <form className="space-y-5 p-6 sm:p-9" onSubmit={onSubmit}>
           {errorMsg ? (
-            <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+            <div className="rounded-xl border border-red-300 bg-red-100 px-3 py-2 text-sm text-red-800">
               {errorMsg}
             </div>
           ) : null}
@@ -156,7 +156,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={!canSubmit}
-            className={`w-full rounded-xl px-3 py-2 text-sm font-medium ${
+            className={`flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium ${
               canSubmit
                 ? "bg-brand text-white shadow-sm hover:bg-brand-dark"
                 : "bg-stone-200 text-stone-500 cursor-not-allowed"

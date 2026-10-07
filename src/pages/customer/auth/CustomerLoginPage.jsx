@@ -159,7 +159,7 @@ export default function CustomerLoginPage() {
             <div className="space-y-4 rounded-3xl border border-white/10 bg-white/10 p-6 shadow-xl backdrop-blur-md">
               <form onSubmit={onSubmit} className="space-y-4">
                 {errorMsg ? (
-                    <div className="rounded-2xl border border-rose-500/50 bg-rose-500/20 px-3 py-2 text-sm text-rose-200">
+                  <div className="rounded-2xl border border-red-300 bg-red-100 px-3 py-2 text-sm text-red-800">
                       {errorMsg}
                     </div>
                 ) : null}
@@ -191,7 +191,7 @@ export default function CustomerLoginPage() {
                 <button
                   type="submit"
                     disabled={!canSubmit}
-                    className={`w-full rounded-2xl px-4 py-3 text-sm font-semibold transition-all ${
+                    className={`flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold transition-all ${
                         canSubmit
                             ? "bg-white text-black hover:bg-stone-200"
                             : "bg-white/30 text-stone-300 cursor-not-allowed"
