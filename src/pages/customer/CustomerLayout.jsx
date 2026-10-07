@@ -1,10 +1,18 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useCart } from "./cart/CartContext";
+import CustomerLoginPrompt from "../../components/customer/CustomerLoginPrompt";
 
 // 1. นำเข้า useAuth จาก Clerk
 import { useAuth } from "@clerk/clerk-react";
 import {authStorage} from "../../utils/authStorage.js";
+
+const CUSTOMER_ONLY_MENU_PATHS = new Set([
+  "/customer/requests",
+  "/customer/orders",
+  "/customer/history",
+  "/customer/claims",
+]);
 
 export default function CustomerLayout() {
   return <Shell />;
@@ -18,8 +26,10 @@ function Shell() {
   const [q, setQ] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [user, setUser] = useState({ fullName: "ลูกค้า", email: ""});
   const isAuthenticated = Boolean(authStorage.token());
+  const isCustomerAuthenticated = isAuthenticated && authStorage.role() === "CUSTOMER";
 
   const dropdownRef = useRef(null);
 
@@ -66,6 +76,16 @@ function Shell() {
     }
   }
 
+  function handleCustomerMenuClick(path) {
+    return (event) => {
+      if (CUSTOMER_ONLY_MENU_PATHS.has(path) && !isCustomerAuthenticated) {
+        event.preventDefault();
+        setShowLoginPrompt(true);
+      }
+      setIsMobileMenuOpen(false);
+    };
+  }
+
   return (
     <div className="min-h-screen bg-paper">
       <header className="sticky top-0 z-40 border-b border-line/80 bg-white/90 shadow-[0_8px_25px_rgba(23,33,31,0.04)] backdrop-blur-md">
@@ -97,10 +117,10 @@ function Shell() {
             <nav className="hidden md:flex items-center gap-1 xl:gap-2">
               <TopLink to="/customer" label="หน้าหลัก" />
               <TopLink to="/customer/shop" label="สินค้า" />
-              <TopLink to="/customer/requests" label="รีเควสสินค้า" />
-              <TopLink to="/customer/orders" label="คำสั่งซื้อ"/>
-              <TopLink to="/customer/history" label="ประวัติสั่งซื้อ" />
-              <TopLink to="/customer/claims" label="คืน/เคลมสินค้า" />
+              <TopLink to="/customer/requests" label="รีเควสสินค้า" onClick={handleCustomerMenuClick("/customer/requests")} />
+              <TopLink to="/customer/orders" label="คำสั่งซื้อ" onClick={handleCustomerMenuClick("/customer/orders")} />
+              <TopLink to="/customer/history" label="ประวัติสั่งซื้อ" onClick={handleCustomerMenuClick("/customer/history")} />
+              <TopLink to="/customer/claims" label="คืน/เคลมสินค้า" onClick={handleCustomerMenuClick("/customer/claims")} />
             </nav>
           </div>
 
@@ -223,10 +243,10 @@ function Shell() {
             
             <MobileLink to="/customer" label="หน้าหลัก" onClick={() => setIsMobileMenuOpen(false)} />
             <MobileLink to="/customer/shop" label="สินค้า" onClick={() => setIsMobileMenuOpen(false)} />
-            <MobileLink to="/customer/requests" label="รีเควสสินค้า" onClick={() => setIsMobileMenuOpen(false)} />
-            <MobileLink to="/customer/orders" label="คำสั่งซื้อ" onClick={() => setIsMobileMenuOpen(false)} />
-            <MobileLink to="/customer/history" label="ประวัติสั่งซื้อ" onClick={() => setIsMobileMenuOpen(false)} />
-            <MobileLink to="/customer/claims" label="คืน/เคลมสินค้า" onClick={() => setIsMobileMenuOpen(false)} />
+            <MobileLink to="/customer/requests" label="รีเควสสินค้า" onClick={handleCustomerMenuClick("/customer/requests")} />
+            <MobileLink to="/customer/orders" label="คำสั่งซื้อ" onClick={handleCustomerMenuClick("/customer/orders")} />
+            <MobileLink to="/customer/history" label="ประวัติสั่งซื้อ" onClick={handleCustomerMenuClick("/customer/history")} />
+            <MobileLink to="/customer/claims" label="คืน/เคลมสินค้า" onClick={handleCustomerMenuClick("/customer/claims")} />
             
             {isAuthenticated ? (
               <button
@@ -250,16 +270,23 @@ function Shell() {
       <main className="mx-auto w-full max-w-[92rem] px-4 py-7 sm:px-6 sm:py-9">
         <Outlet />
       </main>
+
+      <CustomerLoginPrompt
+        open={showLoginPrompt}
+        title="กรุณาเข้าสู่ระบบก่อนใช้งาน"
+        onClose={() => setShowLoginPrompt(false)}
+      />
     </div>
   );
 }
 
 // Component สำหรับเมนู Desktop (แนวนอน)
-function TopLink({ to, label }) {
+function TopLink({ to, label, onClick }) {
   return (
     <NavLink
       to={to}
       end={to === "/customer"}
+      onClick={onClick}
       className={({ isActive }) =>
         `rounded-full px-2.5 py-1.5 text-xs lg:text-sm font-medium transition-all ${
           isActive ? "bg-stone-900 text-white font-semibold shadow-sm" : "text-stone-600 hover:bg-stone-100"
