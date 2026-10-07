@@ -71,7 +71,7 @@ export default function CustomerHomePage() {
       {/* Section 2: big banner */}
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-3xl bg-white p-8">
-          <div className="text-3xl font-semibold">ดีลลดต้อนรับเปิดร้านใหม่!!! <br />เพียงใส่โค้ด RAINSELL</div>
+          <div className="text-3xl font-semibold">ดีลลดต้อนรับเปิดร้านใหม่!!! <br />เพียงใส่โค้ด RAINSELL <br />เมื่อช็อปครบ 15,000 บาท</div>
           <div className="mt-2 text-sm text-muted">
             เลือกซื้อสินค้ากันเลยยย
           </div>
