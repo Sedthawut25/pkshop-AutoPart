@@ -22,7 +22,7 @@ export default function CustomerCheckoutPage() {
   const [promoError, setPromoError] = useState("");
   const [promoSuccess, setPromoSuccess] = useState("");
   const [loadingPromo, setLoadingPromo] = useState(false);
-  const [shippingFee, setShippingFee] = useState(1500);
+  const [shippingFee, setShippingFee] = useState(500);
 
   const token = localStorage.getItem("pk_token");
 
