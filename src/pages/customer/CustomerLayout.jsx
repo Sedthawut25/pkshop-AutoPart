@@ -260,7 +260,7 @@ function Shell() {
                 className="mt-2 w-full rounded-xl border border-line bg-white px-3 py-2 text-left text-sm font-semibold text-ink hover:border-brand/40 hover:bg-brand-soft"
                 onClick={() => nav("/customer/login")}
               >
-                เข้าสู่ระบบเพื่อสั่งซื้อ
+                สมัครสมาชิก
               </button>
             )}
           </div>
